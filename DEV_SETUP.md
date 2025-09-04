@@ -1,8 +1,4 @@
-Quick Dev Setup
-
-## Prerequisites
-- Python 3.11+
-- Node.js 18+
+Quick Setup
 
 ## 1. Install Backend Dependencies
 ```bash
@@ -15,16 +11,16 @@ pip install -r requirements.txt
 # Copy the example env file
 cp .env.example .env
 
-1. Install PostgreSQL
-2. Create database and user
+#1. Install PostgreSQL
+#2. Create database as 'sap' and use superuser 'postgre' with password: admin
 
 # do this
 makedb sap
 
 3. Update `DATABASE_URL` in `.env`:
-   ```
-   DATABASE_URL="postgresql://postgre:admin@localhost/sap"
-   
+
+ DATABASE_URL="postgresql://postgre:admin@localhost/sap"
+ 
 ```
 
 ## 3. Install Frontend Dependencies
