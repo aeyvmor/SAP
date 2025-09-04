@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models, schemas, database
-from ..websocket_manager import manager
+import models
+import schemas
+import database
+import websocket_manager
 import uuid
 
 router = APIRouter(prefix="/api/bom", tags=["BOM"])

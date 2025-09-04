@@ -1,7 +1,10 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models, schemas, database, websocket_manager
+import models
+import schemas
+import database
+import websocket_manager
 from datetime import datetime
 
 router = APIRouter(prefix="/api/production-orders", tags=["Production Orders"])
@@ -9,12 +12,27 @@ router = APIRouter(prefix="/api/production-orders", tags=["Production Orders"])
 @router.post("", response_model=schemas.ProductionOrderResponse)
 def create_order(payload: schemas.ProductionOrderCreate, db: Session = Depends(database.get_db)):
     order_id = f"PO{uuid.uuid4().hex[:8].upper()}"
-    po = models.ProductionOrder(order_id=order_id, material_id=payload.material_id, quantity=payload.quantity, due_date=payload.due_date, priority=payload.priority)
+    
+    # Map payload to model fields with proper enum handling
+    po = models.ProductionOrder(
+        orderId=order_id,
+        materialId=payload.material_id,
+        quantity=payload.quantity,
+        dueDate=payload.due_date,
+        priority=payload.priority,  # This should work now
+        status=models.OrderStatus.CREATED,  # Explicit enum value
+        progress=0,
+        description=getattr(payload, 'description', None),
+        plant=getattr(payload, 'plant', '1000'),
+        costCenter=getattr(payload, 'costCenter', 'CC001')
+    )
+    
     db.add(po)
     db.commit()
     db.refresh(po)
+    
     # notify websocket clients
-    message = {"type": "order_created", "order_id": po.order_id, "material_id": po.material_id, "quantity": po.quantity, "status": po.status.value}
+    message = {"type": "order_created", "order_id": po.orderId, "material_id": po.materialId, "quantity": po.quantity, "status": po.status.value}
     # best-effort broadcast
     try:
         import asyncio

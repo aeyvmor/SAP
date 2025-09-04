@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Float, Enum
-from .database import Base
+from database import Base
 import enum
+from datetime import datetime
 
 class OrderStatus(str, enum.Enum):
     CREATED = "CREATED"
@@ -95,3 +96,56 @@ class WorkCenter(Base):
     status = Column(Enum(WorkCenterStatus))
     costCenter = Column(String)
     plant = Column(String)
+
+class BOMHeader(Base):
+    __tablename__ = "bom_headers"
+
+    bom_id = Column(String, primary_key=True, index=True)
+    parent_material_id = Column(String, index=True)
+    version = Column(String, default="001")
+    valid_from = Column(DateTime, nullable=True)
+    valid_to = Column(DateTime, nullable=True)
+
+class BOMItem(Base):
+    __tablename__ = "bom_items"
+
+    bom_item_id = Column(String, primary_key=True, index=True)
+    bom_id = Column(String, index=True)
+    component_material_id = Column(String, index=True)
+    quantity = Column(Float)
+    position = Column(Integer)
+
+class Stock(Base):
+    __tablename__ = "stock"
+
+    id = Column(String, primary_key=True, index=True)
+    material_id = Column(String, index=True)
+    plant = Column(String)
+    storage_location = Column(String)
+    on_hand = Column(Float, default=0.0)
+    safety_stock = Column(Float, default=0.0)
+
+class Confirmation(Base):
+    __tablename__ = "confirmations"
+
+    id = Column(String, primary_key=True, index=True)
+    order_id = Column(String, index=True)
+    operation_no = Column(String)
+    yield_qty = Column(Float)
+    scrap_qty = Column(Float, default=0.0)
+    work_center_id = Column(String)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
+
+class GoodsMovement(Base):
+    __tablename__ = "goods_movements"
+
+    id = Column(String, primary_key=True, index=True)
+    movement_type = Column(String)  # ISSUE, RECEIPT, TRANSFER, ADJUSTMENT
+    material_id = Column(String, index=True)
+    qty = Column(Float)
+    plant = Column(String)
+    storage_loc = Column(String)
+    order_id = Column(String, nullable=True)
+    reference = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now())

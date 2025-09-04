@@ -1,15 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models, schemas, database
+import models
+import schemas
+import database
 import uuid
 
 router = APIRouter(prefix="/api/materials", tags=["Materials"])
 
 @router.post("", response_model=schemas.MaterialResponse)
 def create_material(payload: schemas.MaterialCreate, db: Session = Depends(database.get_db)):
-    if db.query(models.Material).filter(models.Material.material_id == payload.material_id).first():
+    if db.query(models.Material).filter(models.Material.materialId == payload.material_id).first():
         raise HTTPException(status_code=409, detail="Material already exists")
-    m = models.Material(**payload.dict())
+    
+    # Map the payload fields to model fields
+    material_data = {
+        "materialId": payload.material_id,
+        "description": payload.description,
+        "type": payload.type,
+        "currentStock": payload.currentStock,
+        "minStock": payload.minStock,
+        "maxStock": payload.maxStock,
+        "unitOfMeasure": payload.unitOfMeasure,
+        "unitPrice": payload.unitPrice,
+        "plant": payload.plant,
+        "storageLocation": payload.storageLocation,
+        "status": models.StockStatus.AVAILABLE  # Default status
+    }
+    
+    m = models.Material(**material_data)
     db.add(m)
     db.commit()
     db.refresh(m)

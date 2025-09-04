@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from .. import models, schemas, database
+import models
+import schemas
+import database
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/mrp", tags=["MRP"])
