@@ -885,35 +885,50 @@ Your project will be considered **exceptional** if it demonstrates:
 
 ---
 
-## 🚀 **GETTING STARTED COMMANDS**
+## 🚀 **GETTING STARTED - ONE-CLICK SETUP**
+
+### **🎯 Super Easy Setup (Recommended)**
+
+**Windows:**
+```powershell
+cd setupDev
+.\setup-and-run.ps1
+```
+
+**Linux/Mac:**
+```bash
+cd setupDev
+chmod +x setup-and-run.sh
+./setup-and-run.sh
+```
+
+**That's it!** The script will:
+- ✅ Install all dependencies
+- ✅ Guide you through database setup
+- ✅ Start both servers automatically
+
+### **📋 Manual Setup (If needed)**
 
 ```bash
-# Clone and setup
-git clone <your-repo>
-cd iphone-production-system
-
 # Backend setup
 cd backend
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate     # Windows
-pip install -r requirements.txt
-python seed_data.py
+python -m pip install -r requirements.txt
 
 # Frontend setup
-cd ../frontend
+cd frontend
 npm install
-npm start
 
-# Run with Docker
-docker-compose up --build
+# Database setup
+psql -U postgres
+CREATE DATABASE sap;
+\q
 
-# Run tests
-# Backend
-pytest
-# Frontend
-npm test
+# Start servers manually
+# Backend: cd backend && python -m uvicorn main:app --reload
+# Frontend: cd frontend && npm run dev
 ```
+
+**📖 See [`setupDev/README.md`](setupDev/README.md) for details**
 
 ---
 
