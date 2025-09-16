@@ -1,6 +1,6 @@
-# 🚀 Easy Setup Scripts
+# Setup Scripts
 
-## Quick Start
+## Start
 
 **Windows:**
 ```powershell
@@ -14,11 +14,11 @@ chmod +x setup-and-run.sh
 ```
 
 ## What it does:
-1. ✅ Checks Python & Node.js installation
-2. ✅ Installs backend dependencies
-3. ✅ Installs frontend dependencies  
-4. ✅ Reminds you to create PostgreSQL database
-5. ✅ Optionally starts both servers
+1. Checks Python & Node.js installation
+2. Installs backend dependencies
+3. Installs frontend dependencies  
+4. Reminds you to create PostgreSQL database
+5. Optionally starts both servers
 
 ## Database Setup:
 ```sql

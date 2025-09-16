@@ -49,7 +49,7 @@ Set-Location ..\setupDev
 Write-Host "`n🗄️  Database Setup Required:" -ForegroundColor Yellow
 Write-Host "  Run: psql -U postgres" -ForegroundColor White
 Write-Host "  Then: CREATE DATABASE sap;" -ForegroundColor White
-Write-Host "  Password: admin" -ForegroundColor White
+Write-Host "  Password is: admin" -ForegroundColor White
 
 # Ask if user wants to start servers
 Write-Host "`n🚀 Setup Complete! Start servers now? (Y/N)" -ForegroundColor Green
@@ -70,4 +70,4 @@ if ($response -eq 'Y' -or $response -eq 'y') {
 }
 
 Write-Host "`nPress any key to exit..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
