@@ -25,7 +25,7 @@ const navigation = [
     },
     {
         title: "Materials",
-        url: "#",
+        url: "/materials",
         icon: Wrench,
     },
     {
