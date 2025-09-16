@@ -20,7 +20,7 @@ const navigation = [
     },
     {
         title: "Orders",
-        url: "#",
+        url: "/orders",
         icon: Package,
     },
     {
