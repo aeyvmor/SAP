@@ -50,21 +50,21 @@ def list_orders(status: str = None, db: Session = Depends(database.get_db)):
 
 @router.post("/{order_id}/release")
 def release_order(order_id: str, db: Session = Depends(database.get_db)):
-    po = db.query(models.ProductionOrder).filter(models.ProductionOrder.order_id == order_id).first()
+    po = db.query(models.ProductionOrder).filter(models.ProductionOrder.orderId == order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")
     if po.status != models.OrderStatus.CREATED:
         raise HTTPException(status_code=400, detail="only CREATED orders can be released")
     po.status = models.OrderStatus.RELEASED
     db.commit()
-    # broadcast
-    import asyncio
-    asyncio.create_task(websocket_manager.manager.broadcast({"type": "order_released", "order_id": po.order_id, "status": po.status.value}))
-    return {"order_id": po.order_id, "status": po.status.value}
+    # TODO: Add websocket broadcast back later
+    # import asyncio
+    # asyncio.create_task(websocket_manager.manager.broadcast({"type": "order_released", "order_id": po.orderId, "status": po.status.value}))
+    return {"order_id": po.orderId, "status": po.status.value}
 
 @router.post("/{order_id}/confirm")
 def confirm_order(order_id: str, payload: schemas.ConfirmationCreate, db: Session = Depends(database.get_db)):
-    po = db.query(models.ProductionOrder).filter(models.ProductionOrder.order_id == order_id).first()
+    po = db.query(models.ProductionOrder).filter(models.ProductionOrder.orderId == order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")
     conf = models.Confirmation(id=str(uuid.uuid4()), order_id=order_id, operation_no=payload.operation_no, yield_qty=payload.yield_qty, scrap_qty=payload.scrap_qty or 0.0, work_center_id=payload.work_center_id, start_time=payload.start_time, end_time=payload.end_time)

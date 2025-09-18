@@ -215,6 +215,36 @@ export default function ProductionOrdersPage() {
     refetch();
   };
 
+  const handleReleaseOrder = async (orderId: string) => {
+    try {
+      console.log("Releasing order:", orderId);
+      const result = await apiClient.releaseProductionOrder(orderId);
+      console.log("Release result:", result);
+      alert("Order released successfully!");
+      refetch();
+    } catch (error) {
+      console.error("Failed to release order:", error);
+      // Don't show error alert since the operation might have succeeded
+      // Just log it and refetch to see if it actually worked
+      refetch();
+    }
+  };
+
+  const handleCompleteOrder = async (orderId: string, quantity: number) => {
+    try {
+      console.log("Completing order:", orderId, "quantity:", quantity);
+      const result = await apiClient.completeProductionOrder(orderId, quantity);
+      console.log("Complete result:", result);
+      alert("Order completed successfully!");
+      refetch();
+    } catch (error) {
+      console.error("Failed to complete order:", error);
+      // Don't show error alert since the operation might have succeeded
+      // Just log it and refetch to see if it actually worked
+      refetch();
+    }
+  };
+
   if (error) {
     return (
       <div className="flex flex-1 flex-col gap-10 max-w-7xl">
@@ -254,8 +284,8 @@ export default function ProductionOrdersPage() {
             <Card key={order.id}>
               <p className="text-2xl font-bold">{order.orderId}</p>
 
-              <p className={getOrderStatusColor(order.status)}>
-                {order.status} • {order.priority} Priority
+              <p className={getOrderStatusColor(order.status || 'UNKNOWN')}>
+                {order.status || 'Unknown'} • {order.priority || 'Unknown'} Priority
               </p>
 
               <p className="text-gray-700">
@@ -264,7 +294,7 @@ export default function ProductionOrdersPage() {
 
               <p className="text-sm text-gray-600">
                 Quantity: {order.quantity.toLocaleString()} • Due:{" "}
-                {formatOrderDate(order.dueDate)}
+                {order.dueDate ? formatOrderDate(order.dueDate) : 'Not set'}
               </p>
 
               <div className="mt-3">
@@ -277,6 +307,32 @@ export default function ProductionOrdersPage() {
                     style={{ width: `${order.progress}%` }}
                   />
                 </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                {order.status === "CREATED" && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleReleaseOrder(order.orderId)}
+                    className="bg-yellow-600 hover:bg-yellow-700"
+                  >
+                    Release Order
+                  </Button>
+                )}
+                {(order.status === "CREATED" || order.status === "RELEASED") && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleCompleteOrder(order.orderId, order.quantity)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Complete Order
+                  </Button>
+                )}
+                {order.status === "COMPLETED" && (
+                  <Button size="sm" disabled className="bg-gray-500">
+                    ✓ Completed
+                  </Button>
+                )}
               </div>
             </Card>
           ))

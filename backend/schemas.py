@@ -141,8 +141,8 @@ class ConfirmationCreate(BaseModel):
     yield_qty: float
     scrap_qty: Optional[float] = 0.0
     work_center_id: str
-    start_time: datetime
-    end_time: datetime
+    start_time: str  # Accept string datetime
+    end_time: str    # Accept string datetime
 
 # Goods Movement Schemas
 class MovementItem(BaseModel):

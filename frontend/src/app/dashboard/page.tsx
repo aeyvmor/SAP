@@ -1,21 +1,23 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/Card";
 import {
   useDashboardWithRefresh,
   useWorkCenterEfficiency,
 } from "@/hooks/useApi";
+import { WorkCenter } from "@/lib/api";
 
 export default function Dashboard() {
   const { data: dashboardData, loading } = useDashboardWithRefresh(30000);
   const { data: workCenterData, loading: wcLoading } =
     useWorkCenterEfficiency();
 
-  const metrics = dashboardData?.metrics;
-  const insights = dashboardData?.insights;
+  const metrics = (dashboardData as any)?.metrics;
+  const insights = (dashboardData as any)?.insights;
 
-  const avgEfficiency = workCenterData?.length
-    ? workCenterData.reduce((sum, wc) => sum + (wc.efficiency || 0), 0) /
+  const avgEfficiency = workCenterData && Array.isArray(workCenterData)
+    ? workCenterData.reduce((sum: number, wc: WorkCenter) => sum + (wc.efficiency || 0), 0) /
       workCenterData.length
     : 0;
 
@@ -36,11 +38,19 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold">
               {showValue(
                 loading,
-                insights?.totalMaterialValue
-                  ? formatCurrency(insights.totalMaterialValue)
-                  : "0",
+                insights?.totalUnitsProduced
+                  ? `${insights.totalUnitsProduced.toLocaleString()} units`
+                  : "0 units",
               )}
             </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Value: {showValue(
+                loading,
+                insights?.totalProductionValue
+                  ? formatCurrency(insights.totalProductionValue)
+                  : "$0",
+              )}
+            </p>
           </Card>
 
           <Card>

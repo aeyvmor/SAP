@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "@/lib/api";
 
@@ -42,7 +43,7 @@ export function useDashboardData() {
 
 export function useMetrics() {
   const getMetrics = useCallback(
-    () => api.getDashboardData().then((data) => data.metrics),
+    () => api.getDashboardData().then((data: any) => data.metrics),
     [],
   );
   return useAsync(getMetrics);
@@ -50,7 +51,7 @@ export function useMetrics() {
 
 export function useMaterials() {
   const getMaterials = useCallback(
-    () => api.getDashboardData().then((data) => data.materials),
+    () => api.getDashboardData().then((data: any) => data.materials),
     [],
   );
   return useAsync(getMaterials);
@@ -61,9 +62,9 @@ export function useProductionOrders(status?: string) {
     () =>
       api
         .getDashboardData()
-        .then((data) =>
+        .then((data: any) =>
           status
-            ? data.orders.filter((order) => order.status === status)
+            ? data.orders.filter((order: any) => order.status === status)
             : data.orders,
         ),
     [status],

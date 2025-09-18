@@ -67,7 +67,7 @@ export default function Materials() {
                 </td>
               </tr>
             ) : materials && materials.length > 0 ? (
-              materials.map((material) => {
+              materials.map((material: Material) => {
                 const stockStatus = getStockStatus(material);
                 const statusColorClass = getStatusColorClass(stockStatus);
 
