@@ -67,7 +67,6 @@ export class ErrorBoundary extends React.Component<
   }
 }
 
-// Hook version for functional components
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: React.ComponentType<{ error: Error; resetError: () => void }>,

@@ -2,11 +2,25 @@
 
 import { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-export default function StylizedCard({ children }: { children: ReactNode }) {
-    return (
-        <Card className="border border-t-[10px] border-t-zinc-600 shadow-lg rounded-3xl p-5">
-            {children}
-        </Card>
-    );
+interface StylizedCardProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function StylizedCard({
+  children,
+  className,
+}: StylizedCardProps) {
+  return (
+    <Card
+      className={cn(
+        "border-t-8 border-t-zinc-700 shadow-lg rounded-xl p-6",
+        className,
+      )}
+    >
+      {children}
+    </Card>
+  );
 }

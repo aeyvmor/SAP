@@ -8,7 +8,7 @@ import {
     LucideApple,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 const navigation = [
     {
@@ -28,45 +28,46 @@ const navigation = [
     },
     {
         title: "Analytics",
-        url: "#",
+        url: "/analytics",
         icon: ChartAreaIcon,
     },
 ];
 
 export function Navbar() {
-    const [activePage, setActivePage] = useState("");
+    const pathname = usePathname();
+
+    const isActive = (url: string) => {
+        if (url === "/" && pathname === "/") return true;
+        return pathname.startsWith(url) && url !== "/";
+    };
 
     return (
-        <nav
-            className={`w-full flex items-center py-5 fixed top-0 z-20 bg-white`}
-        >
-            <div className="gap-5 w-full flex flex-col justify-between items-center">
-                <Link
-                    href={"/"}
-                    className="flex items-center"
-                    onClick={() => {
-                        setActivePage("");
-                        window.scrollTo(0, 0);
-                    }}
-                >
+        <nav className="w-full py-3 bg-white border-b border-zinc-400 shadow-lg fixed top-0 z-50">
+            <div className="flex gap-5 flex-col justify-between items-center">
+                <Link href="/">
                     <LucideApple />
                 </Link>
-                <div className="flex border-y border-zinc-400 shadow-lg w-full justify-center">
-                    <ul className="flex justify-center items-center list-none flex-row gap-5 w-full">
-                        {navigation.map((nav) => (
-                            <li
+
+                <div className="flex items-center space-x-1">
+                    {navigation.map((nav) => {
+                        const Icon = nav.icon;
+                        const active = isActive(nav.url);
+
+                        return (
+                            <Link
                                 key={nav.title}
-                                className={`${
-                                    activePage === nav.title
-                                        ? "bg-zinc-800 text-white"
-                                        : "text-black"
-                                } py-2 px-5 rounded-lg text-[18px] font-medium cursor-pointer flex items-center`}
-                                onClick={() => setActivePage(nav.title)}
+                                href={nav.url}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    active
+                                        ? "bg-zinc-900 text-white shadow-sm"
+                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                }`}
                             >
-                                <Link href={nav.url}>{nav.title}</Link>
-                            </li>
-                        ))}
-                    </ul>
+                                <Icon className="h-4 w-4" />
+                                {nav.title}
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
         </nav>
