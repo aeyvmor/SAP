@@ -1,0 +1,67 @@
+# Python Backend Specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python version management
+.python-version
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+default.db
+
+# FastAPI/Uvicorn
+.uvicorn/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Virtual environments (if created locally)
+venv/
+env/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Diagnostic files (created during debugging)
+diagnose_db.py
+create_tables.py

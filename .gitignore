@@ -81,6 +81,7 @@ ipython_config.py
 
 # pyenv
 .python-version
+backend/.python-version
 
 # pipenv
 Pipfile.lock
@@ -245,6 +246,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+default.db
 
 # Backup files
 *.bak
@@ -257,3 +259,23 @@ config.local.*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Docker volumes and data
+postgres_data/
+docker-data/
+
+# Backend specific files
+backend/diagnose_db.py
+backend/create_tables.py
+
+# Unnecessary Node.js files in Python backend
+backend/package-lock.json
+backend/node_modules/
+
+# FastAPI/Uvicorn specific
+.uvicorn/
+
+# Python virtual environments in project
+backend/venv/
+backend/env/
+backend/.venv/
