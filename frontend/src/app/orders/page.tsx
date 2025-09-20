@@ -1,19 +1,39 @@
+"use client";
+
 import { Card } from "@/components/Card";
 import { Button } from "@/components/ui/button";
-
-const orders = [
-    {
-        id: "PO4206967",
-        status: "IN_PROGRESS",
-        priority: "HIGH",
-        model: "iPhone 15 Pro 256GB Natural Titanium",
-        qty: 5000,
-        due: "2025-09-29",
-        progress: 40,
-    },
-];
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function Home() {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["orders"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:8000/api/production-orders"
+            );
+            return response.data;
+        },
+    });
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error loading production orders</div>;
+    }
+
+    const orders = data as Array<{
+        id: string;
+        status: string;
+        priority: string;
+        model: string;
+        qty: number;
+        due: string;
+        progress: number;
+    }>;
+
     return (
         <div className="flex flex-1 flex-col gap-10 max-w-7xl">
             <div className="flex flex-1">

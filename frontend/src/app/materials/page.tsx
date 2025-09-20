@@ -1,57 +1,37 @@
-import { Card } from "@/components/Card";
+"use client";
 
-const materials = [
-    {
-        id: "A17_CHIP",
-        description: "A17 Pro Bionic Chip",
-        type: "RAW",
-        stock: 69420,
-        price: 130,
-        status: "Available",
-    },
-    {
-        id: "OLED_PANEL",
-        description: "6.7-inch OLED Display Panel",
-        type: "COMPONENT",
-        stock: 12000,
-        price: 85,
-        status: "Available",
-    },
-    {
-        id: "BATTERY_5000MAH",
-        description: "5000mAh Lithium Battery",
-        type: "RAW",
-        stock: 8000,
-        price: 25,
-        status: "Low Stock",
-    },
-    {
-        id: "ALUM_FRAME",
-        description: "Aluminum Frame",
-        type: "RAW",
-        stock: 15000,
-        price: 10,
-        status: "Available",
-    },
-    {
-        id: "CAMERA_MODULE",
-        description: "48MP Camera Module",
-        type: "COMPONENT",
-        stock: 5000,
-        price: 60,
-        status: "Out of Stock",
-    },
-    {
-        id: "USB_C_PORT",
-        description: "USB-C Charging Port",
-        type: "COMPONENT",
-        stock: 20000,
-        price: 5,
-        status: "Available",
-    },
-];
+import { Card } from "@/components/Card";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function Home() {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["materials"],
+        queryFn: async () => {
+            const response = await axios.get(
+                "http://localhost:8000/api/materials"
+            );
+            return response.data;
+        },
+    });
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error loading materials</div>;
+    }
+
+    const materials = data as Array<{
+        id: string;
+        description: string;
+        type: string;
+        stock: number;
+        price: number;
+        status: string;
+    }>;
+
     return (
         <div className="flex flex-1 flex-col gap-10 max-w-7xl">
             <p className="text-xl mr-auto">Material Management</p>

@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+backend/lib/
 lib64/
 parts/
 sdist/
@@ -21,6 +21,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Allow frontend lib directory
+!frontend/src/lib/
 
 # PyInstaller
 *.manifest
