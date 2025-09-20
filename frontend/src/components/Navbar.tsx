@@ -6,8 +6,6 @@ import {
     Package,
     Wrench,
     LucideApple,
-    Cross,
-    Hamburger,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -37,7 +35,6 @@ const navigation = [
 
 export function Navbar() {
     const [activePage, setActivePage] = useState("");
-    const [menuOpen, toggleMenu] = useState(false);
 
     return (
         <nav
@@ -46,7 +43,7 @@ export function Navbar() {
             <div className="gap-5 w-full flex flex-col justify-between items-center">
                 <Link
                     href={"/"}
-                    className="flex items-center gap-2"
+                    className="flex items-center"
                     onClick={() => {
                         setActivePage("");
                         window.scrollTo(0, 0);
@@ -54,7 +51,7 @@ export function Navbar() {
                 >
                     <LucideApple />
                 </Link>
-                <div className="hidden sm:flex border-y border-zinc-900 shadow-lg w-full justify-center">
+                <div className="flex border-y border-zinc-400 shadow-lg w-full justify-center">
                     <ul className="flex justify-center items-center list-none flex-row gap-5 w-full">
                         {navigation.map((nav) => (
                             <li
@@ -70,46 +67,6 @@ export function Navbar() {
                             </li>
                         ))}
                     </ul>
-                </div>
-
-                <div className="sm:hidden flex flex-1 justify-end items-center">
-                    <button
-                        className="w-[28px] h-[28px] object-contain cursor-pointer"
-                        onClick={() => {
-                            toggleMenu(!menuOpen);
-                        }}
-                    >
-                        {menuOpen ? (
-                            <Cross className="fill-white hover:fill-zinco-300" />
-                        ) : (
-                            <Hamburger className="fill-white hover:fill-zinco-300" />
-                        )}
-                    </button>
-                    <div
-                        className={`${
-                            !menuOpen ? "hidden" : "flex"
-                        } p-6 bg-black-200 absolute top-20 mx-4 my-2 min-w-[140px] rounded-xl`}
-                    >
-                        <ul className="list-none flex justify-end items-start flex-col gap-4">
-                            {navigation.map((nav) => (
-                                <li
-                                    key={nav.title}
-                                    className={`${
-                                        activePage === nav.title
-                                            ? "text-white"
-                                            : "text-zinc-300"
-                                    }   hover:text-white text-[18px] font-medium cursor-pointer
-                                    `}
-                                    onClick={() => {
-                                        toggleMenu(!menuOpen);
-                                        setActivePage(nav.title);
-                                    }}
-                                >
-                                    <Link href={nav.url}>{nav.title}</Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
                 </div>
             </div>
         </nav>

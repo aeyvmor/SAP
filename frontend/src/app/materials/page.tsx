@@ -1,10 +1,20 @@
 "use client";
 
-import { Card } from "@/components/Card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import Card from "@/components/Card";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-export default function Home() {
+export default function MaterialsPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ["materials"],
         queryFn: async () => {
@@ -24,55 +34,54 @@ export default function Home() {
     }
 
     const materials = data as Array<{
-        id: string;
+        id: number;
+        materialId: string;
         description: string;
         type: string;
-        stock: number;
-        price: number;
+        currentStock: number;
+        minStock: number;
+        maxStock: number;
+        unitOfMeasure: string;
+        unitPrice: number;
         status: string;
+        plant: string;
+        storageLocation: string;
     }>;
 
     return (
-        <div className="flex flex-1 flex-col gap-10 max-w-7xl">
-            <p className="text-xl mr-auto">Material Management</p>
-            <Card>
-                <table className="min-w-full text-left rounded-2xl overflow-hidden border-gray-200">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="px-4 py-2 border-b">Material ID</th>
-                            <th className="px-4 py-2 border-b">Description</th>
-                            <th className="px-4 py-2 border-b">Type</th>
-                            <th className="px-4 py-2 border-b">Stock</th>
-                            <th className="px-4 py-2 border-b">Unit Price</th>
-                            <th className="px-4 py-2 border-b">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {materials.map((material) => (
-                            <tr key={material.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-2 border-b">
-                                    {material.id}
-                                </td>
-                                <td className="px-4 py-2 border-b">
-                                    {material.description}
-                                </td>
-                                <td className="px-4 py-2 border-b">
-                                    {material.type}
-                                </td>
-                                <td className="px-4 py-2 border-b">
-                                    {material.stock}
-                                </td>
-                                <td className="px-4 py-2 border-b">
-                                    ${material.price}
-                                </td>
-                                <td className="px-4 py-2 border-b">
-                                    {material.status}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </Card>
-        </div>
+        <Card>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Materials</h2>
+                <Button>Add New Material</Button>
+            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Material ID</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Current Stock</TableHead>
+                        <TableHead>Unit Price</TableHead>
+                        <TableHead>Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {materials.map((material) => (
+                        <TableRow key={material.id}>
+                            <TableCell>{material.materialId}</TableCell>
+                            <TableCell>{material.description}</TableCell>
+                            <TableCell>{material.type}</TableCell>
+                            <TableCell>{material.currentStock}</TableCell>
+                            <TableCell>
+                                ${material.unitPrice.toFixed(2)}
+                            </TableCell>
+                            <TableCell>
+                                <Badge>{material.status}</Badge>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Card>
     );
 }

@@ -1,11 +1,21 @@
 "use client";
 
-import { Card } from "@/components/Card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import Card from "@/components/Card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-export default function Home() {
+export default function OrdersPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ["orders"],
         queryFn: async () => {
@@ -26,41 +36,64 @@ export default function Home() {
 
     const orders = data as Array<{
         id: string;
+        orderId: string;
+        materialId: string;
+        quantity: number;
         status: string;
         priority: string;
-        model: string;
-        qty: number;
-        due: string;
         progress: number;
+        dueDate: string;
+        plant: string;
     }>;
 
     return (
-        <div className="flex flex-1 flex-col gap-10 max-w-7xl">
-            <div className="flex flex-1">
-                <p className="text-xl mr-auto">Production Orders</p>
-                <Button className="rounded-xl">Create New Order</Button>
+        <Card>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Production Orders</h2>
+                <Button>Create New Order</Button>
             </div>
-            <div className="flex flex-col">
-                {orders.map((order) => (
-                    <Card key={order.id}>
-                        <p className="text-2xl font-bold">{order.id}</p>
-                        <p>
-                            {order.status}, {order.priority}
-                        </p>
-                        <p>{order.model}</p>
-                        <p>
-                            Qty: {order.qty}, Due: {order.due}
-                        </p>
-                        <p>Progress:</p>
-                        <div className="w-full bg-zinc-200 rounded h-2">
-                            <div
-                                className="bg-zinc-700 h-2 rounded"
-                                style={{ width: `${order.progress}%` }}
-                            ></div>
-                        </div>
-                    </Card>
-                ))}
-            </div>
-        </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Material ID</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Progress</TableHead>
+                        <TableHead>Due Date</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {orders.map((order) => (
+                        <TableRow key={order.id}>
+                            <TableCell>{order.orderId}</TableCell>
+                            <TableCell>{order.materialId}</TableCell>
+                            <TableCell>{order.quantity}</TableCell>
+                            <TableCell>
+                                <Badge>{order.status}</Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Badge
+                                    variant={
+                                        order.priority === "HIGH"
+                                            ? "destructive"
+                                            : "default"
+                                    }
+                                >
+                                    {order.priority}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Progress value={order.progress} />
+                            </TableCell>
+                            <TableCell>
+                                {new Date(order.dueDate).toLocaleDateString()}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Card>
     );
 }
