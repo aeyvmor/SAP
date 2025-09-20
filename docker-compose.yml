@@ -1,0 +1,35 @@
+services:
+    postgres:
+        image: postgres:15
+        container_name: postgres_db
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: admin
+            POSTGRES_DB: sap
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    backend:
+        build:
+            context: ./backend
+        container_name: backend_service
+        environment:
+            DATABASE_URL: postgresql://postgres:admin@postgres/sap
+        ports:
+            - "8000:8000"
+        depends_on:
+            - postgres
+
+    frontend:
+        build:
+            context: ./frontend
+        container_name: frontend_service
+        ports:
+            - "3000:3000"
+        depends_on:
+            - backend
+
+volumes:
+    postgres_data:
