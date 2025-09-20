@@ -1,25 +1,9 @@
 {
-  "name": "Node + Python + Postgres Dev Container",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "settings": {
-    "terminal.integrated.defaultProfile.linux": "bash"
-  },
-  "postCreateCommand": "pnpm install",
-  "features": {},
-  "forwardPorts": [5432],
-  "remoteUser": "vscode",
-  "mounts": [
-    "source=${localWorkspaceFolder}/data,target=/var/lib/postgresql/data,type=bind"
-  ],
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-azuretools.vscode-docker",
-        "esbenp.prettier-vscode"
-      ]
-    }
+  "name": "Python 12, npm, pnpm, and PostgreSQL",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12.7"},
+    "ghcr.io/itsmechlark/features/postgresql:1": {},
+    "ghcr.io/devcontainers/features/node:1": {}
   }
 }
