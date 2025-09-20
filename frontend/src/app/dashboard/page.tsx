@@ -1,97 +1,98 @@
-"use client";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/Card";
-import {
-  useDashboardWithRefresh,
-  useWorkCenterEfficiency,
-} from "@/hooks/useApi";
-import { WorkCenter } from "@/lib/api";
 
-export default function Dashboard() {
-  const { data: dashboardData, loading } = useDashboardWithRefresh(30000);
-  const { data: workCenterData, loading: wcLoading } =
-    useWorkCenterEfficiency();
+const materials = [
+    {
+        id: "A17_CHIP",
+        description: "A17 Pro Bionic Chip",
+        type: "RAW",
+        stock: 69420,
+        price: 130,
+        status: "Available",
+    },
+    {
+        id: "OLED_PANEL",
+        description: "6.7-inch OLED Display Panel",
+        type: "COMPONENT",
+        stock: 12000,
+        price: 85,
+        status: "Available",
+    },
+    {
+        id: "BATTERY_5000MAH",
+        description: "5000mAh Lithium Battery",
+        type: "RAW",
+        stock: 8000,
+        price: 25,
+        status: "Low Stock",
+    },
+    {
+        id: "ALUM_FRAME",
+        description: "Aluminum Frame",
+        type: "RAW",
+        stock: 15000,
+        price: 10,
+        status: "Available",
+    },
+    {
+        id: "CAMERA_MODULE",
+        description: "48MP Camera Module",
+        type: "COMPONENT",
+        stock: 5000,
+        price: 60,
+        status: "Out of Stock",
+    },
+    {
+        id: "USB_C_PORT",
+        description: "USB-C Charging Port",
+        type: "COMPONENT",
+        stock: 20000,
+        price: 5,
+        status: "Available",
+    },
+];
 
-  const metrics = (dashboardData as any)?.metrics;
-  const insights = (dashboardData as any)?.insights;
-
-  const avgEfficiency = workCenterData && Array.isArray(workCenterData)
-    ? workCenterData.reduce((sum: number, wc: WorkCenter) => sum + (wc.efficiency || 0), 0) /
-      workCenterData.length
-    : 0;
-
-  const formatCurrency = (value: number) => Math.round(value).toLocaleString();
-
-  const showValue = (
-    isLoading: boolean,
-    value: string | number | undefined,
-    fallback = "0",
-  ) => (isLoading ? "Loading..." : (value ?? fallback));
-
-  return (
-    <div className="flex flex-col gap-10 max-w-7xl">
-      <div className="flex flex-1 flex-row gap-5">
-        <div className="flex flex-1 flex-col gap-5">
-          <Card>
-            <p>Total Production</p>
-            <h1 className="text-3xl font-bold">
-              {showValue(
-                loading,
-                insights?.totalUnitsProduced
-                  ? `${insights.totalUnitsProduced.toLocaleString()} units`
-                  : "0 units",
-              )}
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Value: {showValue(
-                loading,
-                insights?.totalProductionValue
-                  ? formatCurrency(insights.totalProductionValue)
-                  : "$0",
-              )}
-            </p>
-          </Card>
-
-          <Card>
-            <p>Efficiency Rate</p>
-            <h1 className="text-3xl font-bold">
-              {showValue(wcLoading, `${Math.round(avgEfficiency)}%`)}
-            </h1>
-          </Card>
-
-          <Card>
-            <p>Active Orders</p>
-            <h1 className="text-3xl font-bold">
-              {showValue(loading, metrics?.active_orders)}
-            </h1>
-          </Card>
-
-          <Card>
-            <p>Completed Orders</p>
-            <h1 className="text-3xl font-bold">
-              {showValue(loading, metrics?.completed_orders)}
-            </h1>
-          </Card>
+export default function Home() {
+    return (
+        <div className="flex flex-1 flex-col gap-10 max-w-7xl">
+            <p className="text-xl mr-auto">Material Management</p>
+            <Card>
+                <table className="min-w-full text-left rounded-2xl overflow-hidden border-gray-200">
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="px-4 py-2 border-b">Material ID</th>
+                            <th className="px-4 py-2 border-b">Description</th>
+                            <th className="px-4 py-2 border-b">Type</th>
+                            <th className="px-4 py-2 border-b">Stock</th>
+                            <th className="px-4 py-2 border-b">Unit Price</th>
+                            <th className="px-4 py-2 border-b">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {materials.map((material) => (
+                            <tr key={material.id} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 border-b">
+                                    {material.id}
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                    {material.description}
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                    {material.type}
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                    {material.stock}
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                    ${material.price}
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                    {material.status}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Card>
         </div>
-
-        <div className="flex flex-col gap-5 justify-between">
-          <Card>
-            <p>Work Center Efficiency</p>
-            <h1 className="text-3xl font-bold">idk chart here</h1>
-          </Card>
-
-          <Card>
-            <p>Production Trends</p>
-            <h1 className="text-3xl font-bold">idk chart here</h1>
-          </Card>
-        </div>
-      </div>
-
-      <Card>
-        <p>Production Trends</p>
-        <h1 className="text-3xl font-bold">idk chart here</h1>
-      </Card>
-    </div>
-  );
+    );
 }
