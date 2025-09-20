@@ -1,10 +1,53 @@
 from faker import Faker
 import random
 from sqlalchemy.orm import Session
-from database import get_db
+from database import get_db, engine, Base
 import models
 
 fake = Faker()
+
+# Add diagnostic logging
+def check_database_setup():
+    """Check if database tables exist and log diagnostic information"""
+    print("=== DATABASE DIAGNOSTIC INFORMATION ===")
+    
+    # Check if we can connect to the database
+    try:
+        with engine.connect() as conn:
+            print("✓ Database connection successful")
+            
+            # Check if tables exist
+            from sqlalchemy import inspect
+            inspector = inspect(engine)
+            existing_tables = inspector.get_table_names()
+            print(f"Existing tables in database: {existing_tables}")
+            
+            # Check specifically for our required tables
+            required_tables = ['materials', 'production_orders', 'work_centers', 'stock_movements']
+            missing_tables = [table for table in required_tables if table not in existing_tables]
+            
+            if missing_tables:
+                print(f"❌ MISSING TABLES: {missing_tables}")
+                print("This is the root cause of the 'relation does not exist' error")
+                return False
+            else:
+                print("✓ All required tables exist")
+                return True
+                
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        return False
+
+def create_tables_if_missing():
+    """Create database tables if they don't exist"""
+    print("Creating database tables...")
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✓ Database tables created successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to create tables: {e}")
+        return False
 
 def generate_materials():
     materials = []
@@ -154,9 +197,32 @@ def seed_production_orders(db: Session):
     print(f"Seeded {len(orders)} production orders.")
 
 def main():
+    print("Starting database seeding process...")
+    
+    # First, run diagnostic checks
+    if not check_database_setup():
+        print("\n⚠️  Database tables are missing. Attempting to create them...")
+        if not create_tables_if_missing():
+            print("❌ Failed to create database tables. Exiting.")
+            return
+        
+        # Verify tables were created
+        if not check_database_setup():
+            print("❌ Tables still missing after creation attempt. Exiting.")
+            return
+    
+    print("\n=== STARTING DATA SEEDING ===")
     db = next(get_db())
-    seed_materials(db)
-    seed_production_orders(db)
+    
+    try:
+        seed_materials(db)
+        seed_production_orders(db)
+        print("✓ Database seeding completed successfully!")
+    except Exception as e:
+        print(f"❌ Error during seeding: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     main()
