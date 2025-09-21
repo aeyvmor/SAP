@@ -21,6 +21,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+PHASE2_PROGRESS_SUMMARY.md
 
 # Allow frontend lib directory
 !frontend/src/lib/
