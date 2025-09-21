@@ -13,9 +13,7 @@ ROUTING API ENDPOINTS
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
+from database import models, schemas, get_db
 import uuid
 from datetime import datetime
 from typing import List
@@ -23,7 +21,7 @@ from typing import List
 router = APIRouter(prefix="/api/routing", tags=["Routing"])
 
 @router.post("", response_model=schemas.RoutingResponse)
-def create_routing(payload: schemas.RoutingCreate, db: Session = Depends(database.get_db)):
+def create_routing(payload: schemas.RoutingCreate, db: Session = Depends(get_db)):
     """Create a new routing with operations"""
     
     # Check if routing already exists
@@ -83,7 +81,7 @@ def create_routing(payload: schemas.RoutingCreate, db: Session = Depends(databas
 def list_routings(
     material_id: str = None, 
     plant: str = None,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db)
 ):
     """List all routings with optional filtering"""
     query = db.query(models.Routing)
@@ -96,7 +94,7 @@ def list_routings(
     return query.all()
 
 @router.get("/{routing_id}", response_model=schemas.RoutingWithOperations)
-def get_routing_with_operations(routing_id: str, db: Session = Depends(database.get_db)):
+def get_routing_with_operations(routing_id: str, db: Session = Depends(get_db)):
     """Get routing with all its operations"""
     
     routing = db.query(models.Routing).filter(models.Routing.routing_id == routing_id).first()
@@ -113,7 +111,7 @@ def get_routing_with_operations(routing_id: str, db: Session = Depends(database.
     }
 
 @router.get("/{routing_id}/operations", response_model=List[schemas.OperationResponse])
-def get_routing_operations(routing_id: str, db: Session = Depends(database.get_db)):
+def get_routing_operations(routing_id: str, db: Session = Depends(get_db)):
     """Get all operations for a routing"""
     
     # Verify routing exists
@@ -131,7 +129,7 @@ def get_routing_operations(routing_id: str, db: Session = Depends(database.get_d
 def add_operation_to_routing(
     routing_id: str, 
     payload: schemas.OperationCreate, 
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db)
 ):
     """Add a new operation to an existing routing"""
     
@@ -185,7 +183,7 @@ def update_operation(
     routing_id: str,
     operation_id: str,
     payload: schemas.OperationCreate,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db)
 ):
     """Update an existing operation"""
     
@@ -224,7 +222,7 @@ def update_operation(
     return operation
 
 @router.delete("/{routing_id}")
-def delete_routing(routing_id: str, db: Session = Depends(database.get_db)):
+def delete_routing(routing_id: str, db: Session = Depends(get_db)):
     """Delete a routing and all its operations"""
     
     routing = db.query(models.Routing).filter(models.Routing.routing_id == routing_id).first()
@@ -252,7 +250,7 @@ def delete_routing(routing_id: str, db: Session = Depends(database.get_db)):
     return {"message": f"Routing {routing_id} deleted successfully"}
 
 @router.get("/material/{material_id}", response_model=List[schemas.RoutingResponse])
-def get_routings_for_material(material_id: str, db: Session = Depends(database.get_db)):
+def get_routings_for_material(material_id: str, db: Session = Depends(get_db)):
     """Get all routings for a specific material"""
     
     # Verify material exists

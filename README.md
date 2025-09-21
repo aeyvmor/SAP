@@ -45,7 +45,7 @@ basically a SAP dashboard demo that uses python backend that handles the api and
     ```bash
     docker exec -it backend_service bash
     pip install faker
-    python seed_database.py
+    python ./test/seed_database.py
     ```
 
 6. **Stop and Remove Containers**

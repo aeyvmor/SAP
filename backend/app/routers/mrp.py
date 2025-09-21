@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
+from database import models, schemas, get_db
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/mrp", tags=["MRP"])
@@ -20,7 +18,7 @@ def explode_bom(db: Session, parent_material_id: str, qty: float, accumulator: d
     return accumulator
 
 @router.post("/run")
-def run_mrp(payload: schemas.MRPRequest, db: Session = Depends(database.get_db)):
+def run_mrp(payload: schemas.MRPRequest, db: Session = Depends(get_db)):
     horizon_end = datetime.utcnow() + timedelta(days=payload.planning_horizon_days or 90)
     orders = db.query(models.ProductionOrder).filter(models.ProductionOrder.due_date <= horizon_end, models.ProductionOrder.status.in_(["CREATED","RELEASED","IN_PROGRESS"])).all()
     material_reqs = {}

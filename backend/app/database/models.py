@@ -12,7 +12,7 @@ Gagawin pa: (the specific transactions to implement)
 """
 
 from sqlalchemy import Column, Integer, String, DateTime, Float, Enum
-from database import Base
+from .database import Base
 import enum
 from datetime import datetime
 

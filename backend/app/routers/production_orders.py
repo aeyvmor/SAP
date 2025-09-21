@@ -1,16 +1,13 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
-import websocket_manager
-from datetime import datetime
+from database import models, schemas, get_db
+import utils.websocket_manager as websocket_manager
 
 router = APIRouter(prefix="/api/production-orders", tags=["Production Orders"])
 
 @router.post("", response_model=schemas.ProductionOrderResponse)
-def create_order(payload: schemas.ProductionOrderCreate, db: Session = Depends(database.get_db)):
+def create_order(payload: schemas.ProductionOrderCreate, db: Session = Depends(get_db)):
     order_id = f"PO{uuid.uuid4().hex[:8].upper()}"
     
     # Map payload to model fields with proper enum handling
@@ -42,14 +39,14 @@ def create_order(payload: schemas.ProductionOrderCreate, db: Session = Depends(d
     return po
 
 @router.get("", response_model=list[schemas.ProductionOrderResponse])
-def list_orders(status: str = None, db: Session = Depends(database.get_db)):
+def list_orders(status: str = None, db: Session = Depends(get_db)):
     q = db.query(models.ProductionOrder)
     if status:
         q = q.filter(models.ProductionOrder.status == status)
     return q.all()
 
 @router.post("/{order_id}/release")
-def release_order(order_id: str, db: Session = Depends(database.get_db)):
+def release_order(order_id: str, db: Session = Depends(get_db)):
     po = db.query(models.ProductionOrder).filter(models.ProductionOrder.orderId == order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")
@@ -63,7 +60,7 @@ def release_order(order_id: str, db: Session = Depends(database.get_db)):
     return {"order_id": po.orderId, "status": po.status.value}
 
 @router.post("/{order_id}/confirm")
-def confirm_order(order_id: str, payload: schemas.ConfirmationCreate, db: Session = Depends(database.get_db)):
+def confirm_order(order_id: str, payload: schemas.ConfirmationCreate, db: Session = Depends(get_db)):
     po = db.query(models.ProductionOrder).filter(models.ProductionOrder.orderId == order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")

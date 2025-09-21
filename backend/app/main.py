@@ -1,16 +1,11 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-from database import engine
-import models
-from websocket_manager import websocket_endpoint
-import os
+from database import Base, engine, models
+from utils.websocket_manager import websocket_endpoint
 
 load_dotenv()
 
-# Create database tables
 models.Base.metadata.create_all(bind=engine)
 
 # Added routing router for routing/operations functionality

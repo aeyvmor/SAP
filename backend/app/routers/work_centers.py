@@ -6,14 +6,12 @@ Endpoints:
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
+from database import models, schemas, get_db
 
 router = APIRouter(prefix="/api/work-centers", tags=["Work Centers"])
 
 @router.post("")
-def create_wc(payload: schemas.WorkCenterCreate, db: Session = Depends(database.get_db)):
+def create_wc(payload: schemas.WorkCenterCreate, db: Session = Depends(get_db)):
     if db.query(models.WorkCenter).filter(models.WorkCenter.workCenterId == payload.work_center_id).first():
         raise HTTPException(status_code=409, detail="exists")
     wc = models.WorkCenter(
@@ -31,5 +29,5 @@ def create_wc(payload: schemas.WorkCenterCreate, db: Session = Depends(database.
     return {"message": "created", "work_center_id": wc.workCenterId}
 
 @router.get("")
-def list_wcs(db: Session = Depends(database.get_db)):
+def list_wcs(db: Session = Depends(get_db)):
     return db.query(models.WorkCenter).all()

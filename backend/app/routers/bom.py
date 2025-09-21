@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
-import websocket_manager
+from database import models, schemas, get_db
+import utils.websocket_manager as websocket_manager
 import uuid
 
 router = APIRouter(prefix="/api/bom", tags=["BOM"])
 
 @router.post("")
-def create_bom(payload: schemas.BOMCreate, db: Session = Depends(database.get_db)):
+def create_bom(payload: schemas.BOMCreate, db: Session = Depends(get_db)):
     if db.query(models.BOMHeader).filter(models.BOMHeader.bom_id == payload.bom_id).first():
         raise HTTPException(status_code=409, detail="BOM exists")
     bh = models.BOMHeader(bom_id=payload.bom_id, parent_material_id=payload.parent_material_id, version=payload.version)
@@ -21,7 +19,7 @@ def create_bom(payload: schemas.BOMCreate, db: Session = Depends(database.get_db
     return {"message": "BOM created", "bom_id": payload.bom_id}
 
 @router.get("/{parent_material_id}")
-def get_bom(parent_material_id: str, db: Session = Depends(database.get_db)):
+def get_bom(parent_material_id: str, db: Session = Depends(get_db)):
     headers = db.query(models.BOMHeader).filter(models.BOMHeader.parent_material_id == parent_material_id).all()
     out = []
     for h in headers:

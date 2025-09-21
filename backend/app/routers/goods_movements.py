@@ -1,15 +1,13 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models
-import schemas
-import database
-import websocket_manager
+from database import models, schemas, get_db
+import utils.websocket_manager as websocket_manager
 
 router = APIRouter(prefix="/api/goods-movements", tags=["Goods Movements"])
 
 @router.post("/issue")
-def goods_issue(payload: schemas.GoodsIssueCreate, db: Session = Depends(database.get_db)):
+def goods_issue(payload: schemas.GoodsIssueCreate, db: Session = Depends(get_db)):
     po = db.query(models.ProductionOrder).filter(models.ProductionOrder.order_id == payload.order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")
@@ -26,7 +24,7 @@ def goods_issue(payload: schemas.GoodsIssueCreate, db: Session = Depends(databas
     return {"message": "issued"}
 
 @router.post("/receipt")
-def goods_receipt(payload: schemas.GoodsReceiptCreate, db: Session = Depends(database.get_db)):
+def goods_receipt(payload: schemas.GoodsReceiptCreate, db: Session = Depends(get_db)):
     po = db.query(models.ProductionOrder).filter(models.ProductionOrder.order_id == payload.order_id).first()
     if not po:
         raise HTTPException(status_code=404, detail="order not found")
