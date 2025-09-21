@@ -38,7 +38,7 @@ export default function OrdersPage() {
         queryKey: ["orders"],
         queryFn: async () => {
             const response = await axios.get(
-                "http://localhost:8000/api/production-orders"
+                `${process.env.NEXT_PUBLIC_API_URL}/api/production-orders`
             );
             return response.data;
         },

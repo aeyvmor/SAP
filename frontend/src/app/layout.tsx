@@ -1,37 +1,41 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
 import QueryProvider from "@/components/QueryProvider";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "SAP Manufacturing System",
-  description: "gago",
+    title: "SAP Manufacturing System",
+    description: "gago",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} antialiased`}>
-        <QueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <Navbar />
-            <div className="mt-32 flex-1 flex justify-center px-5 py-10 overflow-auto">
-              {children}
-            </div>
-          </ThemeProvider>
-        </QueryProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" suppressHydrationWarning>
+            <body className={`${geistSans.variable} antialiased`}>
+                <QueryProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="light"
+                        enableSystem
+                    >
+                        <Navbar />
+                        <div className="mt-32 flex-1 flex justify-center px-5 py-10 overflow-auto">
+                            {children}
+                        </div>
+                    </ThemeProvider>
+                </QueryProvider>
+            </body>
+        </html>
+    );
 }
