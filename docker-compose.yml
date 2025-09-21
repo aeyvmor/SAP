@@ -19,6 +19,8 @@ services:
             DATABASE_URL: postgresql://postgres:admin@postgres/sap
         ports:
             - "8000:8000"
+        volumes:
+            - ./backend:/app
         depends_on:
             - postgres
 
@@ -28,6 +30,8 @@ services:
         container_name: frontend_service
         ports:
             - "3000:3000"
+        volumes:
+            - ./frontend:/app
         depends_on:
             - backend
 
