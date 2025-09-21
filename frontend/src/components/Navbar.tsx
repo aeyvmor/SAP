@@ -6,6 +6,7 @@ import {
     Package,
     Wrench,
     LucideApple,
+    Calculator,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,6 +26,11 @@ const navigation = [
         title: "Materials",
         url: "/materials",
         icon: Wrench,
+    },
+    {
+        title: "MRP Planning",
+        url: "/mrp",
+        icon: Calculator,
     },
     {
         title: "Analytics",

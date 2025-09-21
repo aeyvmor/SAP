@@ -27,12 +27,49 @@ import {
     CheckCircle,
     Calendar,
     AlertCircle,
+    Edit,
+    CheckSquare,
+    History,
+    Settings,
 } from "lucide-react";
 import { useState } from "react";
+import { OrderChangeModal } from "@/components/OrderChangeModal";
+import { OperationConfirmationModal } from "@/components/OperationConfirmationModal";
+import { OrderHistoryModal } from "@/components/OrderHistoryModal";
 
 export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedTab, setSelectedTab] = useState("all");
+    
+    // Modal states
+    const [changeModalOpen, setChangeModalOpen] = useState(false);
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [historyModalOpen, setHistoryModalOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<{
+        orderId: string;
+        materialId: string;
+        quantity: number;
+        dueDate: string;
+        priority: string;
+        routingId?: string;
+        description?: string;
+    } | null>(null);
+
+    // Modal handlers
+    const handleChangeOrder = (order: typeof orders[0]) => {
+        setSelectedOrder(order);
+        setChangeModalOpen(true);
+    };
+
+    const handleConfirmOperation = (order: typeof orders[0]) => {
+        setSelectedOrder(order);
+        setConfirmModalOpen(true);
+    };
+
+    const handleViewHistory = (order: typeof orders[0]) => {
+        setSelectedOrder(order);
+        setHistoryModalOpen(true);
+    };
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["orders"],
@@ -244,6 +281,9 @@ export default function OrdersPage() {
                                         <TableHead className="font-semibold">
                                             Due Date
                                         </TableHead>
+                                        <TableHead className="font-semibold">
+                                            Actions
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -340,7 +380,40 @@ export default function OrdersPage() {
                                                         )}
                                                     </div>
                                                 </TableCell>
-                                            </TableRow>
+                                                <TableCell>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 px-2"
+                                                            title="Change Order (CO02)"
+                                                            onClick={() => handleChangeOrder(order)}
+                                                        >
+                                                            <Edit className="h-3 w-3" />
+                                                        </Button>
+                                                        {order.status === "IN_PROGRESS" && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-8 px-2"
+                                                                title="Confirm Operations (CO11N)"
+                                                                onClick={() => handleConfirmOperation(order)}
+                                                            >
+                                                                <CheckSquare className="h-3 w-3" />
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 px-2"
+                                                            title="View History"
+                                                            onClick={() => handleViewHistory(order)}
+                                                        >
+                                                            <History className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                           </TableRow>
                                         );
                                     })}
                                 </TableBody>
@@ -362,6 +435,28 @@ export default function OrdersPage() {
                     </TabsContent>
                 </Tabs>
             </Card>
+
+            {/* Modal Components */}
+            {selectedOrder && (
+                <>
+                    <OrderChangeModal
+                        isOpen={changeModalOpen}
+                        onClose={() => setChangeModalOpen(false)}
+                        order={selectedOrder}
+                    />
+                    <OperationConfirmationModal
+                        isOpen={confirmModalOpen}
+                        onClose={() => setConfirmModalOpen(false)}
+                        order={selectedOrder}
+                    />
+                </>
+            )}
+            
+            <OrderHistoryModal
+                isOpen={historyModalOpen}
+                onClose={() => setHistoryModalOpen(false)}
+                orderId={selectedOrder?.orderId || ""}
+            />
         </div>
     );
 }
