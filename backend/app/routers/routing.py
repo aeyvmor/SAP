@@ -13,7 +13,7 @@ ROUTING API ENDPOINTS
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import models, schemas, get_db
+from ..database import models, schemas, get_db
 import uuid
 from datetime import datetime
 from typing import List
