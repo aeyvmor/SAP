@@ -6,7 +6,7 @@ Endpoints:
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import models, schemas, get_db
+from ..database import models, schemas, get_db
 
 router = APIRouter(prefix="/api/work-centers", tags=["Work Centers"])
 
