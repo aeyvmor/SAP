@@ -1,3 +1,16 @@
+"""
+ROUTING/OPERATIONS 
+
+1. Added Routing and Operations models for manufacturing step-by-step logic
+2. Added PlannedOrder, PurchaseRequisition model for MRP order generation (MD01)
+3. Added OrderChangeHistory model for production order changing (CO02)
+
+Gagawin pa: (the specific transactions to implement)
+- MD01: MRP Run with planned order/purchase generation
+- CO02: Production Order Change Management 
+- CO11N: Order Confirmation (Confirming the orders yourself para ma mark as completed)
+"""
+
 from sqlalchemy import Column, Integer, String, DateTime, Float, Enum
 from database import Base
 import enum
@@ -149,111 +162,111 @@ class GoodsMovement(Base):
     order_id = Column(String, nullable=True)
     reference = Column(String, nullable=True)
     timestamp = Column(DateTime, default=lambda: datetime.now())
-    
-    # Routing and Operations Models / Step-by-Step Logic 
-    class RoutingStatus(str, enum.Enum):
-        ACTIVE = "ACTIVE"
-        INACTIVE = "INACTIVE"
-        DRAFT = "DRAFT"
-    
-    class OperationStatus(str, enum.Enum):
-        ACTIVE = "ACTIVE"
-        INACTIVE = "INACTIVE"
-        COMPLETED = "COMPLETED"
-    
-    class Routing(Base):
-        __tablename__ = "routings"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        routing_id = Column(String, unique=True, index=True)
-        material_id = Column(String, index=True)  # Material this routing is for
-        description = Column(String)
-        version = Column(String, default="001")
-        status = Column(Enum(RoutingStatus), default=RoutingStatus.ACTIVE)
-        plant = Column(String)
-        valid_from = Column(DateTime, nullable=True)
-        valid_to = Column(DateTime, nullable=True)
-        created_at = Column(DateTime, default=lambda: datetime.now())
-        updated_at = Column(DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
-    
-    class Operation(Base):
-        __tablename__ = "operations"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        operation_id = Column(String, index=True)  # Operation number (e.g., "0010", "0020")
-        routing_id = Column(String, index=True)  # Foreign key to routing
-        work_center_id = Column(String, index=True)  # Work center where operation is performed
-        description = Column(String)
-        sequence = Column(Integer)  # Order of operations (10, 20, 30, etc.)
-        setup_time = Column(Float, default=0.0)  # Setup time in minutes
-        machine_time = Column(Float, default=0.0)  # Machine time per unit in minutes
-        labor_time = Column(Float, default=0.0)  # Labor time per unit in minutes
-        status = Column(Enum(OperationStatus), default=OperationStatus.ACTIVE)
-        control_key = Column(String, default="PP01")  # Control key for operation type
-        created_at = Column(DateTime, default=lambda: datetime.now())
-        updated_at = Column(DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
-    
-    # Enhanced models for Phase 2 transactions
-    class PlannedOrder(Base):
-        __tablename__ = "planned_orders"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        planned_order_id = Column(String, unique=True, index=True)
-        material_id = Column(String, index=True)
-        quantity = Column(Float)
-        due_date = Column(DateTime)
-        start_date = Column(DateTime)
-        plant = Column(String)
-        mrp_controller = Column(String, nullable=True)
-        order_type = Column(String, default="PP")  # PP = Production, PR = Purchase Requisition
-        status = Column(String, default="PLANNED")
-        created_by_mrp_run = Column(String, nullable=True)  # MRP run ID that created this
-        created_at = Column(DateTime, default=lambda: datetime.now())
-    
-    class PurchaseRequisition(Base):
-        __tablename__ = "purchase_requisitions"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        pr_number = Column(String, unique=True, index=True)
-        material_id = Column(String, index=True)
-        quantity = Column(Float)
-        delivery_date = Column(DateTime)
-        plant = Column(String)
-        purchasing_group = Column(String, nullable=True)
-        status = Column(String, default="OPEN")  # OPEN, RELEASED, ORDERED
-        created_by_mrp_run = Column(String, nullable=True)
-        created_at = Column(DateTime, default=lambda: datetime.now())
-    
-    class OrderChangeHistory(Base):
-        __tablename__ = "order_change_history"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        change_id = Column(String, unique=True, index=True)
-        order_id = Column(String, index=True)
-        change_type = Column(String)  # QUANTITY, DATE, COMPONENT, OPERATION
-        field_name = Column(String)
-        old_value = Column(String, nullable=True)
-        new_value = Column(String, nullable=True)
-        reason = Column(String, nullable=True)
-        changed_by = Column(String, default="SYSTEM")
-        change_timestamp = Column(DateTime, default=lambda: datetime.now())
-    
-    class OperationConfirmation(Base):
-        __tablename__ = "operation_confirmations"
-    
-        id = Column(Integer, primary_key=True, index=True)
-        confirmation_id = Column(String, unique=True, index=True)
-        order_id = Column(String, index=True)
-        operation_id = Column(String, index=True)
-        work_center_id = Column(String, index=True)
-        yield_qty = Column(Float)
-        scrap_qty = Column(Float, default=0.0)
-        setup_time_actual = Column(Float, default=0.0)
-        machine_time_actual = Column(Float, default=0.0)
-        labor_time_actual = Column(Float, default=0.0)
-        start_time = Column(DateTime)
-        end_time = Column(DateTime)
-        confirmation_type = Column(String, default="FINAL")  # PARTIAL, FINAL
-        status = Column(String, default="CONFIRMED")
-        confirmed_by = Column(String, default="SYSTEM")
-        created_at = Column(DateTime, default=lambda: datetime.now())
+
+# Routing and Operations Models / Step-by-Step Logic 
+class RoutingStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DRAFT = "DRAFT"
+
+class OperationStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    COMPLETED = "COMPLETED"
+
+class Routing(Base):
+    __tablename__ = "routings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    routing_id = Column(String, unique=True, index=True)
+    material_id = Column(String, index=True)  # Material this routing is for
+    description = Column(String)
+    version = Column(String, default="001")
+    status = Column(Enum(RoutingStatus), default=RoutingStatus.ACTIVE)
+    plant = Column(String)
+    valid_from = Column(DateTime, nullable=True)
+    valid_to = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now())
+    updated_at = Column(DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
+
+class Operation(Base):
+    __tablename__ = "operations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    operation_id = Column(String, index=True)  # Operation number (e.g., "0010", "0020")
+    routing_id = Column(String, index=True)  # Foreign key to routing
+    work_center_id = Column(String, index=True)  # Work center where operation is performed
+    description = Column(String)
+    sequence = Column(Integer)  # Order of operations (10, 20, 30, etc.)
+    setup_time = Column(Float, default=0.0)  # Setup time in minutes
+    machine_time = Column(Float, default=0.0)  # Machine time per unit in minutes
+    labor_time = Column(Float, default=0.0)  # Labor time per unit in minutes
+    status = Column(Enum(OperationStatus), default=OperationStatus.ACTIVE)
+    control_key = Column(String, default="PP01")  # Control key for operation type
+    created_at = Column(DateTime, default=lambda: datetime.now())
+    updated_at = Column(DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
+
+# Enhanced models for Phase 2 transactions
+class PlannedOrder(Base):
+    __tablename__ = "planned_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    planned_order_id = Column(String, unique=True, index=True)
+    material_id = Column(String, index=True)
+    quantity = Column(Float)
+    due_date = Column(DateTime)
+    start_date = Column(DateTime)
+    plant = Column(String)
+    mrp_controller = Column(String, nullable=True)
+    order_type = Column(String, default="PP")  # PP = Production, PR = Purchase Requisition
+    status = Column(String, default="PLANNED")
+    created_by_mrp_run = Column(String, nullable=True)  # MRP run ID that created this
+    created_at = Column(DateTime, default=lambda: datetime.now())
+
+class PurchaseRequisition(Base):
+    __tablename__ = "purchase_requisitions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pr_number = Column(String, unique=True, index=True)
+    material_id = Column(String, index=True)
+    quantity = Column(Float)
+    delivery_date = Column(DateTime)
+    plant = Column(String)
+    purchasing_group = Column(String, nullable=True)
+    status = Column(String, default="OPEN")  # OPEN, RELEASED, ORDERED
+    created_by_mrp_run = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now())
+
+class OrderChangeHistory(Base):
+    __tablename__ = "order_change_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    change_id = Column(String, unique=True, index=True)
+    order_id = Column(String, index=True)
+    change_type = Column(String)  # QUANTITY, DATE, COMPONENT, OPERATION
+    field_name = Column(String)
+    old_value = Column(String, nullable=True)
+    new_value = Column(String, nullable=True)
+    reason = Column(String, nullable=True)
+    changed_by = Column(String, default="SYSTEM")
+    change_timestamp = Column(DateTime, default=lambda: datetime.now())
+
+class OperationConfirmation(Base):
+    __tablename__ = "operation_confirmations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    confirmation_id = Column(String, unique=True, index=True)
+    order_id = Column(String, index=True)
+    operation_id = Column(String, index=True)
+    work_center_id = Column(String, index=True)
+    yield_qty = Column(Float)
+    scrap_qty = Column(Float, default=0.0)
+    setup_time_actual = Column(Float, default=0.0)
+    machine_time_actual = Column(Float, default=0.0)
+    labor_time_actual = Column(Float, default=0.0)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
+    confirmation_type = Column(String, default="FINAL")  # PARTIAL, FINAL
+    status = Column(String, default="CONFIRMED")
+    confirmed_by = Column(String, default="SYSTEM")
+    created_at = Column(DateTime, default=lambda: datetime.now())

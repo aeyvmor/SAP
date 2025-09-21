@@ -1,3 +1,16 @@
+"""
+ROUTING API ENDPOINTS
+
+- POST /api/routing - Create routing with operations (like a recipe)
+- GET /api/routing - List all routings
+- GET /api/routing/{routing_id} - Get routing with operations
+- POST /api/routing/{routing_id}/operations - Add operation to routing
+- PUT /api/routing/{routing_id}/operations/{operation_id} - Update operation
+- DELETE /api/routing/{routing_id} - Delete routing
+- GET /api/routing/material/{material_id} - Get routings for material
+
+"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import models

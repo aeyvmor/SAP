@@ -1,3 +1,16 @@
+"""
+ROUTING/OPERATIONS SCHEMAS
+
+Added schemas fo routing and operations functionality:
+1. RoutingCreate/Response - For creating manufacturing routings (step-by-step)
+2. OperationCreate/Response - For individual operations within routings
+3. PlannedOrderCreate/Response - For MRP planned orders (MD01)
+4. PurchaseRequisitionCreate/Response - For MRP purchase requisitions (MD01)
+5. OrderChangeRequest/Response - For tracking production order changes (CO02)
+6. OperationConfirmationCreate/Response - For operation confirmations (CO11N)
+
+"""
+
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import datetime
