@@ -29,6 +29,14 @@ basically a SAP dashboard demo that uses python backend that handles the api and
      DATABASE_URL="postgresql://postgres:admin@postgres/sap"
      ```
 
+   - Create a `.env` file in the `frontend` directory with the following content:
+
+     ```env
+      NODE_ENV=development
+      NEXT_PUBLIC_NODE_ENV=development
+      NEXT_PUBLIC_API_URL=http://localhost:8000
+     ```
+
 3. **Build and Run Docker Containers**
 
    ```bash
@@ -45,6 +53,7 @@ basically a SAP dashboard demo that uses python backend that handles the api and
     ```bash
     docker exec -it backend_service bash
     pip install faker
+    cd /app
     python ./test/seed_database.py
     ```
 

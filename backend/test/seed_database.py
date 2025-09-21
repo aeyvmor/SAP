@@ -1,8 +1,14 @@
 from faker import Faker
 import random
 from sqlalchemy.orm import Session
-from database import get_db, engine, Base
-import models
+import sys
+import os
+
+# Add the app directory to the Python path so we can import from it
+sys.path.append('/app/app')
+
+from database.database import get_db, engine, Base
+from database import models
 
 fake = Faker()
 
@@ -103,13 +109,13 @@ def generate_materials():
         materials.append(models.Material(
             materialId=material_id,
             description=part,
-            type="RAW",
+            type=models.MaterialType.RAW,
             currentStock=random.randint(50, 1000),
             minStock=random.randint(10, 50),
             maxStock=random.randint(500, 2000),
             unitOfMeasure="EA",
             unitPrice=round(random.uniform(10, 500), 2),
-            status="Available",
+            status=models.StockStatus.AVAILABLE,
             plant="1000",
             storageLocation="0001"
         ))
@@ -175,14 +181,40 @@ def generate_production_orders():
             orderId=fake.unique.bothify(text="PO######"),
             materialId=material_id,
             quantity=random.randint(100, 1000),
-            status=random.choice(["CREATED", "IN_PROGRESS", "COMPLETED"]),
-            priority=random.choice(["HIGH", "MEDIUM", "LOW"]),
+            status=random.choice([models.OrderStatus.CREATED, models.OrderStatus.IN_PROGRESS, models.OrderStatus.COMPLETED]),
+            priority=random.choice([models.OrderPriority.HIGH, models.OrderPriority.MEDIUM, models.OrderPriority.LOW]),
             progress=random.randint(0, 100),
             dueDate=fake.date_between(start_date="today", end_date="+30d"),
             plant="1000",
             description=product
         ))
     return orders
+
+def generate_work_centers():
+    work_centers = []
+    centers = [
+        ("WC001", "Assembly Line 1", "Main iPhone assembly line", 100, 95.0),
+        ("WC002", "Assembly Line 2", "Secondary iPhone assembly line", 80, 92.0),
+        ("WC003", "Testing Station 1", "Quality testing and inspection", 50, 98.0),
+        ("WC004", "Testing Station 2", "Final quality control", 40, 99.0),
+        ("WC005", "Packaging Line 1", "Primary packaging station", 120, 90.0),
+        ("WC006", "Packaging Line 2", "Secondary packaging station", 100, 88.0),
+        ("WC007", "Component Prep", "Component preparation area", 60, 85.0),
+        ("WC008", "Final Inspection", "Final inspection before shipping", 30, 99.5),
+    ]
+    
+    for wc_id, name, desc, capacity, efficiency in centers:
+        work_centers.append(models.WorkCenter(
+            workCenterId=wc_id,
+            name=name,
+            description=desc,
+            capacity=capacity,
+            efficiency=efficiency,
+            status=models.WorkCenterStatus.ACTIVE,
+            costCenter="CC001",
+            plant="1000"
+        ))
+    return work_centers
 
 def seed_materials(db: Session):
     materials = generate_materials()
@@ -195,6 +227,12 @@ def seed_production_orders(db: Session):
     db.add_all(orders)
     db.commit()
     print(f"Seeded {len(orders)} production orders.")
+
+def seed_work_centers(db: Session):
+    work_centers = generate_work_centers()
+    db.add_all(work_centers)
+    db.commit()
+    print(f"Seeded {len(work_centers)} work centers.")
 
 def main():
     print("Starting database seeding process...")
@@ -217,6 +255,7 @@ def main():
     try:
         seed_materials(db)
         seed_production_orders(db)
+        seed_work_centers(db)
         print("✓ Database seeding completed successfully!")
     except Exception as e:
         print(f"❌ Error during seeding: {e}")
