@@ -1,15 +1,15 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from .database import Base, engine, models
-from .utils.websocket_manager import websocket_endpoint
+from database import Base, engine, models
+from utils.websocket_manager import websocket_endpoint
 
 load_dotenv()
 
 models.Base.metadata.create_all(bind=engine)
 
 # Added routing router for routing/operations functionality
-from .routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing
+from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing
 
 app = FastAPI(title="SAP Manufacturing System API", version="1.0.0")
 
