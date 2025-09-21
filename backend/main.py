@@ -13,7 +13,7 @@ load_dotenv()
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
-from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers
+from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing
 
 app = FastAPI(title="SAP Manufacturing System API", version="1.0.0")
 
@@ -35,6 +35,7 @@ app.include_router(materials.router)
 app.include_router(mrp.router)
 app.include_router(production_orders.router)
 app.include_router(work_centers.router)
+app.include_router(routing.router)
 
 # WebSocket endpoint
 @app.websocket("/ws/{client_id}")
