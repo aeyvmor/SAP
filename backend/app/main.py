@@ -34,8 +34,8 @@ def create_tables_with_retry(max_retries=30, delay=2):
 # Create tables with retry
 create_tables_with_retry()
 
-# Added routing router for routing/operations functionality
-from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing
+# Added routing router for routing/operations functionality, order_changes for CO02, and operation_confirmations for CO11N
+from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing, order_changes, operation_confirmations
 
 app = FastAPI(title="SAP Manufacturing System API", version="1.0.0")
 
@@ -58,6 +58,8 @@ app.include_router(mrp.router)
 app.include_router(production_orders.router)
 app.include_router(work_centers.router)
 app.include_router(routing.router)
+app.include_router(order_changes.router)
+app.include_router(operation_confirmations.router)
 
 # WebSocket endpoint
 @app.websocket("/ws/{client_id}")

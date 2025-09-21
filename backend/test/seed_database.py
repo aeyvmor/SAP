@@ -216,6 +216,60 @@ def generate_work_centers():
         ))
     return work_centers
 
+def generate_routings():
+    """Generate routings for iPhone products"""
+    routings = []
+    operations_data = []
+    
+    # Define standard iPhone production routing operations
+    standard_operations = [
+        ("0010", "WC007", "Component Preparation", 10, 10.0, 30.0, 20.0),
+        ("0020", "WC001", "Main Assembly", 20, 15.0, 60.0, 45.0),
+        ("0030", "WC003", "Quality Testing", 30, 5.0, 30.0, 15.0),
+        ("0040", "WC005", "Packaging", 40, 8.0, 20.0, 25.0),
+        ("0050", "WC008", "Final Inspection", 50, 3.0, 10.0, 12.0)
+    ]
+    
+    # iPhone models that should have routings (finished products)
+    iphone_models = [
+        "IPHONE_13_MINI", "IPHONE_13", "IPHONE_13_PRO", "IPHONE_13_PRO_MAX",
+        "IPHONE_14", "IPHONE_14_PLUS", "IPHONE_14_PRO", "IPHONE_14_PRO_MAX",
+        "IPHONE_15", "IPHONE_15_PLUS", "IPHONE_15_PRO", "IPHONE_15_PRO_MAX",
+        "IPHONE_12", "IPHONE_12_PRO", "IPHONE_11", "IPHONE_11_PRO"
+    ]
+    
+    for i, material_id in enumerate(iphone_models):
+        routing_id = f"RT{str(i+1).zfill(3)}"
+        
+        # Create routing header
+        routing = models.Routing(
+            routing_id=routing_id,
+            material_id=material_id,
+            description=f"Production routing for {material_id.replace('_', ' ')}",
+            version="001",
+            status=models.RoutingStatus.ACTIVE,
+            plant="1000"
+        )
+        routings.append(routing)
+        
+        # Create operations for this routing
+        for op_id, wc_id, desc, seq, setup, machine, labor in standard_operations:
+            operation = models.Operation(
+                operation_id=op_id,
+                routing_id=routing_id,
+                work_center_id=wc_id,
+                description=desc,
+                sequence=seq,
+                setup_time=setup,
+                machine_time=machine,
+                labor_time=labor,
+                status=models.OperationStatus.ACTIVE,
+                control_key="PP01"
+            )
+            operations_data.append(operation)
+    
+    return routings, operations_data
+
 def seed_materials(db: Session):
     materials = generate_materials()
     db.add_all(materials)
@@ -233,6 +287,14 @@ def seed_work_centers(db: Session):
     db.add_all(work_centers)
     db.commit()
     print(f"Seeded {len(work_centers)} work centers.")
+
+def seed_routings(db: Session):
+    routings, operations = generate_routings()
+    db.add_all(routings)
+    db.commit()
+    db.add_all(operations)
+    db.commit()
+    print(f"Seeded {len(routings)} routings with {len(operations)} operations.")
 
 def main():
     print("Starting database seeding process...")
@@ -256,6 +318,7 @@ def main():
         seed_materials(db)
         seed_production_orders(db)
         seed_work_centers(db)
+        seed_routings(db)
         print("✓ Database seeding completed successfully!")
     except Exception as e:
         print(f"❌ Error during seeding: {e}")

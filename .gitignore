@@ -22,6 +22,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 PHASE2_PROGRESS_SUMMARY.md
+phase2Claude.md
 
 # Allow frontend lib directory
 !frontend/src/lib/
