@@ -1,12 +1,38 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+import time
+import logging
+from sqlalchemy.exc import OperationalError
 from database import Base, engine, models
 from utils.websocket_manager import websocket_endpoint
 
 load_dotenv()
 
-models.Base.metadata.create_all(bind=engine)
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Database connection retry logic
+def create_tables_with_retry(max_retries=30, delay=2):
+    """Create database tables with retry logic for Docker startup"""
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})")
+            models.Base.metadata.create_all(bind=engine)
+            logger.info("Database tables created successfully!")
+            return True
+        except OperationalError as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Database connection failed, retrying in {delay} seconds... Error: {e}")
+                time.sleep(delay)
+            else:
+                logger.error(f"Failed to connect to database after {max_retries} attempts")
+                raise e
+    return False
+
+# Create tables with retry
+create_tables_with_retry()
 
 # Added routing router for routing/operations functionality
 from routers import auth, analytics, bom, goods_movements, materials, mrp, production_orders, work_centers, routing
