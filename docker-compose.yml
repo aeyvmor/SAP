@@ -16,11 +16,12 @@ services:
             context: ./backend
         container_name: backend_service
         environment:
-            DATABASE_URL: postgresql://postgres:admin@postgres/sap
+            DATABASE_URL: postgresql://postgres:admin@postgres:5432/sap
         ports:
             - "8000:8000"
         volumes:
             - ./backend:/app
+            - /app/node_modules
         depends_on:
             - postgres
 
@@ -32,10 +33,9 @@ services:
             - "3000:3000"
         volumes:
             - ./frontend:/app
+            - /app/node_modules
         depends_on:
             - backend
-        dns:
-            - 8.8.8.8
 
 volumes:
     postgres_data:
