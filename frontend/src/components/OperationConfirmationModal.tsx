@@ -84,6 +84,10 @@ export function OperationConfirmationModal({ isOpen, onClose, order }: Operation
     const handleSubmit = () => {
         if (!operationId || !workCenterId || !yieldQty || !startTime || !endTime) return;
 
+        // Convert datetime-local strings to ISO format
+        const startDateTime = new Date(startTime).toISOString();
+        const endDateTime = new Date(endTime).toISOString();
+
         const confirmationData: ConfirmationRequest = {
             order_id: order.orderId,
             operation_id: operationId,
@@ -93,8 +97,8 @@ export function OperationConfirmationModal({ isOpen, onClose, order }: Operation
             setup_time_actual: parseFloat(setupTime) || 0,
             machine_time_actual: parseFloat(machineTime) || 0,
             labor_time_actual: parseFloat(laborTime) || 0,
-            start_time: startTime,
-            end_time: endTime,
+            start_time: startDateTime,
+            end_time: endDateTime,
             confirmation_type: confirmationType
         };
 

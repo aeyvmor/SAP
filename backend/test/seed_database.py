@@ -119,72 +119,74 @@ def generate_materials():
             plant="1000",
             storageLocation="0001"
         ))
+    
+    # Add finished products as materials
+    products = get_product_list()
+    for product in products:
+        material_id = product.replace(" ", "_").upper()
+        materials.append(models.Material(
+            materialId=material_id,
+            description=product,
+            type=models.MaterialType.FINISHED,
+            currentStock=random.randint(0, 50),
+            minStock=10,
+            maxStock=100,
+            unitOfMeasure="EA",
+            unitPrice=round(random.uniform(500, 1500), 2),
+            status=models.StockStatus.AVAILABLE,
+            plant="1000",
+            storageLocation="0002"  # Different storage location for finished goods
+        ))
     return materials
+
+def get_product_list():
+    """Returns a list of iPhone product names"""
+    return [
+        "iPhone 13 Mini", "iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max",
+        "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max",
+        "iPhone SE (3rd Gen)", "iPhone 12 Mini", "iPhone 12", "iPhone 12 Pro",
+        "iPhone 12 Pro Max", "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max",
+        "iPhone XR", "iPhone XS", "iPhone XS Max", "iPhone X", "iPhone 8",
+        "iPhone 8 Plus", "iPhone 7", "iPhone 7 Plus", "iPhone 6S", "iPhone 6S Plus",
+        "iPhone 6", "iPhone 6 Plus", "iPhone 5S", "iPhone 5C", "iPhone 5",
+        "iPhone 4S", "iPhone 4", "iPhone 3GS", "iPhone 3G", "iPhone (1st Gen)",
+        "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max",
+        "iPhone 15 Ultra", "iPhone 15 SE", "iPhone 15 Fold", "iPhone 15 Lite",
+        "iPhone 15 Mini", "iPhone 15 Air", "iPhone 15 Dynamic", "iPhone 15 Edge",
+        "iPhone 15 Compact", "iPhone 15 Max"
+    ]
 
 def generate_production_orders():
     orders = []
-    products = [
-        "iPhone 13 Mini",
-        "iPhone 13",
-        "iPhone 13 Pro",
-        "iPhone 13 Pro Max",
-        "iPhone 14",
-        "iPhone 14 Plus",
-        "iPhone 14 Pro",
-        "iPhone 14 Pro Max",
-        "iPhone SE (3rd Gen)",
-        "iPhone 12 Mini",
-        "iPhone 12",
-        "iPhone 12 Pro",
-        "iPhone 12 Pro Max",
-        "iPhone 11",
-        "iPhone 11 Pro",
-        "iPhone 11 Pro Max",
-        "iPhone XR",
-        "iPhone XS",
-        "iPhone XS Max",
-        "iPhone X",
-        "iPhone 8",
-        "iPhone 8 Plus",
-        "iPhone 7",
-        "iPhone 7 Plus",
-        "iPhone 6S",
-        "iPhone 6S Plus",
-        "iPhone 6",
-        "iPhone 6 Plus",
-        "iPhone 5S",
-        "iPhone 5C",
-        "iPhone 5",
-        "iPhone 4S",
-        "iPhone 4",
-        "iPhone 3GS",
-        "iPhone 3G",
-        "iPhone (1st Gen)",
-        "iPhone 15",
-        "iPhone 15 Plus",
-        "iPhone 15 Pro",
-        "iPhone 15 Pro Max",
-        "iPhone 15 Ultra",
-        "iPhone 15 SE",
-        "iPhone 15 Fold",
-        "iPhone 15 Lite",
-        "iPhone 15 Mini",
-        "iPhone 15 Air",
-        "iPhone 15 Dynamic",
-        "iPhone 15 Edge",
-        "iPhone 15 Compact",
-        "iPhone 15 Max"
+    products = get_product_list()
+
+    # iPhone models that have routings
+    routable_products = [
+        "IPHONE_13_MINI", "IPHONE_13", "IPHONE_13_PRO", "IPHONE_13_PRO_MAX",
+        "IPHONE_14", "IPHONE_14_PLUS", "IPHONE_14_PRO", "IPHONE_14_PRO_MAX",
+        "IPHONE_15", "IPHONE_15_PLUS", "IPHONE_15_PRO", "IPHONE_15_PRO_MAX",
+        "IPHONE_12", "IPHONE_12_PRO", "IPHONE_11", "IPHONE_11_PRO"
     ]
+
     for product in products:
         material_id = product.replace(" ", "_").upper()
+
+        # Assign routing if this product has one
+        routing_id = None
+        if material_id in routable_products:
+            # Find the routing index for this material
+            routing_index = routable_products.index(material_id) + 1
+            routing_id = f"RT{str(routing_index).zfill(3)}"
+
         orders.append(models.ProductionOrder(
             orderId=fake.unique.bothify(text="PO######"),
             materialId=material_id,
             quantity=random.randint(100, 1000),
-            status=random.choice([models.OrderStatus.CREATED, models.OrderStatus.IN_PROGRESS, models.OrderStatus.COMPLETED]),
+            status=random.choice([models.OrderStatus.CREATED, models.OrderStatus.RELEASED, models.OrderStatus.IN_PROGRESS, models.OrderStatus.COMPLETED]),
             priority=random.choice([models.OrderPriority.HIGH, models.OrderPriority.MEDIUM, models.OrderPriority.LOW]),
             progress=random.randint(0, 100),
             dueDate=fake.date_between(start_date="today", end_date="+30d"),
+            routingId=routing_id,  # Assign routing if available
             plant="1000",
             description=product
         ))
@@ -270,6 +272,74 @@ def generate_routings():
     
     return routings, operations_data
 
+def generate_operation_confirmations(db: Session):
+    """Generate operation confirmations for existing production orders"""
+    confirmations = []
+    
+    # Get all production orders and their operations
+    orders = db.query(models.ProductionOrder).all()
+    
+    for order in orders:
+        # Only create confirmations for orders that are in progress
+        if order.status != models.OrderStatus.IN_PROGRESS:
+            continue
+            
+        routing = db.query(models.Routing).filter(models.Routing.material_id == order.materialId).first()
+        if not routing:
+            continue
+            
+        operations = db.query(models.Operation).filter(models.Operation.routing_id == routing.routing_id).all()
+        
+        for op in operations:
+            # Randomly decide whether to create a confirmation for this operation
+            if random.random() < 0.7:  # 70% chance
+                confirmation = models.OperationConfirmation(
+                    order_id=order.orderId,
+                    operation_id=op.operation_id,
+                    work_center_id=op.work_center_id,
+                    yield_qty=random.randint(int(order.quantity * 0.8), order.quantity),
+                    scrap_qty=random.randint(0, int(order.quantity * 0.05)),
+                    setup_time_actual=op.setup_time * random.uniform(0.9, 1.2),
+                    machine_time_actual=op.machine_time * random.uniform(0.95, 1.3),
+                    labor_time_actual=op.labor_time * random.uniform(0.9, 1.1),
+                    # confirmation_text=f"Confirmation for op {op.operation_id} of order {order.orderId}",
+                    # personnel_number=fake.numerify(text="########")
+                )
+                confirmations.append(confirmation)
+                
+    return confirmations
+
+def generate_order_change_history(db: Session):
+    """Generate change history for existing production orders"""
+    change_history = []
+    
+    orders = db.query(models.ProductionOrder).all()
+    
+    for order in orders:
+        # Create a few random change events for each order
+        for _ in range(random.randint(0, 3)):
+            field_changed = random.choice(["quantity", "dueDate", "priority"])
+            old_value = str(getattr(order, field_changed))
+            
+            if field_changed == "quantity":
+                new_value = str(order.quantity + random.randint(-20, 20))
+            elif field_changed == "dueDate":
+                new_value = str(order.dueDate + timedelta(days=random.randint(-5, 5)))
+            else: # priority
+                new_value = random.choice([p.value for p in models.OrderPriority if p.value != order.priority])
+
+            change = models.OrderChangeHistory(
+                order_id=order.orderId,
+                field_name=field_changed,
+                old_value=old_value,
+                new_value=new_value,
+                change_reason=fake.sentence(nb_words=4),
+                changed_by="system_seed"
+            )
+            change_history.append(change)
+            
+    return change_history
+
 def seed_materials(db: Session):
     materials = generate_materials()
     db.add_all(materials)
@@ -296,6 +366,18 @@ def seed_routings(db: Session):
     db.commit()
     print(f"Seeded {len(routings)} routings with {len(operations)} operations.")
 
+def seed_operation_confirmations(db: Session):
+    confirmations = generate_operation_confirmations(db)
+    db.add_all(confirmations)
+    db.commit()
+    print(f"Seeded {len(confirmations)} operation confirmations.")
+
+def seed_order_change_history(db: Session):
+    change_history = generate_order_change_history(db)
+    db.add_all(change_history)
+    db.commit()
+    print(f"Seeded {len(change_history)} order change history records.")
+
 def main():
     print("Starting database seeding process...")
     
@@ -319,6 +401,8 @@ def main():
         seed_production_orders(db)
         seed_work_centers(db)
         seed_routings(db)
+        seed_operation_confirmations(db)
+        seed_order_change_history(db)
         print("✓ Database seeding completed successfully!")
     except Exception as e:
         print(f"❌ Error during seeding: {e}")

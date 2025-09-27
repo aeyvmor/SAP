@@ -30,7 +30,6 @@ import {
     Edit,
     CheckSquare,
     History,
-    Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { OrderChangeModal } from "@/components/OrderChangeModal";

@@ -34,6 +34,8 @@ services:
             - ./frontend:/app
         depends_on:
             - backend
+        dns:
+            - 8.8.8.8
 
 volumes:
     postgres_data:

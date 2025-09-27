@@ -21,10 +21,7 @@ import {
     Play,
     Package,
     ShoppingCart,
-    AlertTriangle,
     CheckCircle,
-    Clock,
-    TrendingUp,
     FileText,
     RefreshCw,
 } from "lucide-react";
