@@ -26,6 +26,8 @@ phase2Claude.md
 
 # Allow frontend lib directory
 !frontend/src/lib/
+frontend/Dockerfile
+docker-compose.yml
 
 # PyInstaller
 *.manifest
