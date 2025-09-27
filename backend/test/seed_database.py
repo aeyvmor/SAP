@@ -3,6 +3,7 @@ import random
 from sqlalchemy.orm import Session
 import sys
 import os
+from datetime import timedelta
 
 # Add the app directory to the Python path so we can import from it
 sys.path.append('/app/app')

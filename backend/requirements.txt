@@ -6,3 +6,4 @@ pydantic-settings==2.1.0
 python-dotenv==1.0.0
 python-multipart==0.0.6
 websockets==12.0
+faker==20.1.0
