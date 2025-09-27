@@ -25,6 +25,7 @@ import {
     Minus,
 } from "lucide-react";
 import { useState } from "react";
+import AddMaterialModal from "@/components/AddMaterialModal";
 
 export default function MaterialsPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -139,10 +140,7 @@ export default function MaterialsPage() {
                         />
                     </div>
                 </div>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Material
-                </Button>
+                <AddMaterialModal />
             </div>
 
             <Card className="shadow-md">

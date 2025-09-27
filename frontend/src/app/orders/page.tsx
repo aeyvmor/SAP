@@ -35,6 +35,7 @@ import { useState } from "react";
 import { OrderChangeModal } from "@/components/OrderChangeModal";
 import { OperationConfirmationModal } from "@/components/OperationConfirmationModal";
 import { OrderHistoryModal } from "@/components/OrderHistoryModal";
+import CreateOrderModal from "@/components/CreateOrderModal";
 
 export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -216,10 +217,7 @@ export default function OrdersPage() {
                         />
                     </div>
                 </div>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Order
-                </Button>
+                <CreateOrderModal />
             </div>
 
             <Card className="shadow-md">
