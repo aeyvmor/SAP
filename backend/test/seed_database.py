@@ -373,41 +373,51 @@ def seed_operation_confirmations(db: Session):
     print(f"Seeded {len(confirmations)} operation confirmations.")
 
 def generate_boms():
-    """Generate BOMs for iPhone products"""
-    boms = []
+    """Generate BOMs for multiple iPhone finished products using a standard component set"""
+    bom_headers = []
+    bom_items = []
 
-    # iPhone 15 Pro BOM - what components go into it
-    iphone_15_pro_bom = models.BOMHeader(
-        bom_id="BOM_IPHONE_15_PRO_001",
-        parent_material_id="IPHONE_15_PRO",
-        version="001"
-    )
-    boms.append(iphone_15_pro_bom)
-
-    # Components for iPhone 15 Pro
+    # Standard components used across iPhone models (genericized for demo)
     components = [
         ("6.1-INCH_SUPER_RETINA_XDR_DISPLAY", 1.0),
         ("A17_PRO_BIONIC_CHIP", 1.0),
         ("4323MAH_LITHIUM-ION_BATTERY", 1.0),
         ("STAINLESS_STEEL_FRAME", 1.0),
-        ("12MP_ULTRA_WIDE_CAMERA", 2.0),  # Triple camera system
+        ("12MP_ULTRA_WIDE_CAMERA", 2.0),
         ("LIGHTNING_CHARGING_PORT", 1.0),
         ("CERAMIC_SHIELD_FRONT_COVER", 1.0),
         ("GLASS_BACK", 1.0),
     ]
 
-    bom_items = []
-    for component_id, quantity in components:
-        item = models.BOMItem(
-            bom_item_id=f"{iphone_15_pro_bom.bom_id}_{component_id}",
-            bom_id=iphone_15_pro_bom.bom_id,
-            component_material_id=component_id,
-            quantity=quantity,
-            position=len(bom_items) + 10  # SAP-style positioning
-        )
-        bom_items.append(item)
+    # Finished goods we want BOMs for (align with routings and common products)
+    iphone_models = [
+        "IPHONE_13_MINI", "IPHONE_13", "IPHONE_13_PRO", "IPHONE_13_PRO_MAX",
+        "IPHONE_14", "IPHONE_14_PLUS", "IPHONE_14_PRO", "IPHONE_14_PRO_MAX",
+        "IPHONE_15", "IPHONE_15_PLUS", "IPHONE_15_PRO", "IPHONE_15_PRO_MAX"
+    ]
 
-    return boms, bom_items
+    for fg in iphone_models:
+        bom_id = f"BOM_{fg}_001"
+        header = models.BOMHeader(
+            bom_id=bom_id,
+            parent_material_id=fg,
+            version="001"
+        )
+        bom_headers.append(header)
+
+        pos = 10
+        for component_id, qty in components:
+            item = models.BOMItem(
+                bom_item_id=f"{bom_id}_{component_id}",
+                bom_id=bom_id,
+                component_material_id=component_id,
+                quantity=qty,
+                position=pos
+            )
+            bom_items.append(item)
+            pos += 10
+
+    return bom_headers, bom_items
 
 def generate_stock(db: Session):
     """Generate stock records for all materials"""

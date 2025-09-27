@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import models, schemas, get_db
 import utils.websocket_manager as websocket_manager
+from datetime import datetime
 
 router = APIRouter(prefix="/api/production-orders", tags=["Production Orders"])
 
@@ -75,3 +76,125 @@ def confirm_order(order_id: str, payload: schemas.ConfirmationCreate, db: Sessio
     import asyncio
     asyncio.create_task(websocket_manager.manager.broadcast({"type": "confirmation", "order_id": order_id, "yield_total": total_yield, "order_status": po.status.value}))
     return {"message": "confirmation posted", "order_status": po.status.value}
+
+@router.post("/{order_id}/complete")
+def complete_order(order_id: str, db: Session = Depends(get_db)):
+    """
+    One-click completion for demo:
+    - Goods Issue: issue BOM components (reduces component stock)
+    - Goods Receipt: receive finished product (increases FG stock)
+    - Mark order COMPLETED, progress=100, set actualEndDate
+    """
+    po = db.query(models.ProductionOrder).filter(models.ProductionOrder.orderId == order_id).first()
+    if not po:
+        raise HTTPException(status_code=404, detail="order not found")
+
+    finished_mat = db.query(models.Material).filter(models.Material.materialId == po.materialId).first()
+    if not finished_mat:
+        raise HTTPException(status_code=404, detail=f"Finished material {po.materialId} not found")
+
+    now = datetime.now()
+
+    # 1) Goods Issue for BOM components (if any)
+    bom_headers = db.query(models.BOMHeader).filter(models.BOMHeader.parent_material_id == po.materialId).all()
+    if bom_headers:
+        for bh in bom_headers:
+            bom_items = db.query(models.BOMItem).filter(models.BOMItem.bom_id == bh.bom_id).all()
+            for item in bom_items:
+                comp_id = item.component_material_id
+                issue_qty = float(item.quantity) * float(po.quantity)
+
+                # Stock record for component
+                comp_stock = db.query(models.Stock).filter(
+                    models.Stock.material_id == comp_id,
+                    models.Stock.plant == po.plant
+                ).first()
+                if not comp_stock:
+                    comp_stock = models.Stock(
+                        id=f"{comp_id}_{po.plant}_0001",
+                        material_id=comp_id,
+                        plant=po.plant,
+                        storage_location="0001",
+                        on_hand=0.0,
+                        safety_stock=0.0
+                    )
+                    db.add(comp_stock)
+                    db.flush()
+
+                comp_stock.on_hand = float(comp_stock.on_hand) - issue_qty
+
+                comp_mat = db.query(models.Material).filter(models.Material.materialId == comp_id).first()
+                if comp_mat:
+                    comp_mat.currentStock = int((comp_mat.currentStock or 0) - issue_qty)
+
+                gi = models.GoodsMovement(
+                    id=f"GI{uuid.uuid4().hex[:8].upper()}",
+                    movement_type="ISSUE",
+                    material_id=comp_id,
+                    qty=issue_qty,
+                    plant=po.plant,
+                    storage_loc=comp_stock.storage_location,
+                    order_id=po.orderId,
+                    reference=f"Auto issue by complete for order {po.orderId}",
+                    timestamp=now
+                )
+                db.add(gi)
+
+    # 2) Goods Receipt for Finished Good
+    fg_storage = finished_mat.storageLocation or "0002"
+    fg_stock = db.query(models.Stock).filter(
+        models.Stock.material_id == po.materialId,
+        models.Stock.plant == po.plant
+    ).first()
+    if not fg_stock:
+        fg_stock = models.Stock(
+            id=f"{po.materialId}_{po.plant}_{fg_storage}",
+            material_id=po.materialId,
+            plant=po.plant,
+            storage_location=fg_storage,
+            on_hand=0.0,
+            safety_stock=0.0
+        )
+        db.add(fg_stock)
+        db.flush()
+
+    fg_stock.on_hand = float(fg_stock.on_hand) + float(po.quantity)
+    finished_mat.currentStock = int((finished_mat.currentStock or 0) + int(po.quantity))
+
+    gr = models.GoodsMovement(
+        id=f"GR{uuid.uuid4().hex[:8].upper()}",
+        movement_type="RECEIPT",
+        material_id=po.materialId,
+        qty=float(po.quantity),
+        plant=po.plant,
+        storage_loc=fg_storage,
+        order_id=po.orderId,
+        reference=f"Auto receipt by complete for order {po.orderId}",
+        timestamp=now
+    )
+    db.add(gr)
+
+    # 3) Mark order completed
+    po.status = models.OrderStatus.COMPLETED
+    po.progress = 100
+    po.actualEndDate = now
+    db.commit()
+
+    # Best-effort broadcast
+    try:
+        import asyncio
+        asyncio.create_task(websocket_manager.manager.broadcast({
+            "type": "order_completed",
+            "order_id": po.orderId,
+            "material_id": po.materialId,
+            "quantity": po.quantity,
+            "status": po.status.value
+        }))
+    except Exception:
+        pass
+
+    return {
+        "message": "order completed",
+        "order_id": po.orderId,
+        "status": po.status.value
+    }

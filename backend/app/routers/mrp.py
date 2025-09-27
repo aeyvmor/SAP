@@ -130,14 +130,28 @@ def run_mrp_enhanced(payload: schemas.MRPRunRequest, db: Session = Depends(get_d
                     
                     # Determine procurement type based on material type
                     if material.type in [models.MaterialType.FINISHED, models.MaterialType.SEMI_FINISHED]:
-                        # Create planned order for production
-                        if payload.create_planned_orders:
+                        # Planning-driven default:
+                        # Only create a planned order for the finished/semi-finished material
+                        # when there is NO existing firm production order within the horizon.
+                        existing_po = db.query(models.ProductionOrder).filter(
+                            models.ProductionOrder.materialId == material_id,
+                            models.ProductionOrder.dueDate <= horizon_end,
+                            models.ProductionOrder.status.in_([
+                                models.OrderStatus.CREATED,
+                                models.OrderStatus.RELEASED,
+                                models.OrderStatus.IN_PROGRESS,
+                            ])
+                        ).first()
+
+                        if payload.create_planned_orders and not existing_po:
                             due_date = horizon_end  # Simplified - use horizon end as due date
                             planned_order = create_planned_order(
                                 db, material_id, shortage, due_date,
                                 payload.plant or "1000", mrp_run_id
                             )
                             planned_orders_created += 1
+                        # If a firm order exists already, we skip creating a planned order for the FG/SFG.
+                        # Component requirements are still planned via their own material entries.
                             
                     elif material.type == models.MaterialType.RAW:
                         # Create purchase requisition for procurement

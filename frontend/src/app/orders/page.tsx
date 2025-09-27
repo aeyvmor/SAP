@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
     Package,
@@ -40,6 +40,7 @@ import CreateOrderModal from "@/components/CreateOrderModal";
 export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedTab, setSelectedTab] = useState("all");
+    const queryClient = useQueryClient();
     
     // Modal states
     const [changeModalOpen, setChangeModalOpen] = useState(false);
@@ -78,6 +79,21 @@ export default function OrdersPage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/api/production-orders`
             );
             return response.data;
+        },
+    });
+
+    // Complete order mutation
+    const completeMutation = useMutation({
+        mutationFn: async (orderId: string) => {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/production-orders/${orderId}/complete`
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["materials"] });
+            queryClient.invalidateQueries({ queryKey: ["analytics"] });
         },
     });
 
@@ -408,6 +424,17 @@ export default function OrdersPage() {
                                                         >
                                                             <History className="h-3 w-3" />
                                                         </Button>
+                                                        {order.status !== "COMPLETED" && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="h-8 px-2"
+                                                                title="Complete Order (Auto GI/GR)"
+                                                                onClick={() => completeMutation.mutate(order.orderId)}
+                                                                disabled={completeMutation.isPending}
+                                                            >
+                                                                {completeMutation.isPending ? "Completing..." : "Complete"}
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                            </TableRow>
