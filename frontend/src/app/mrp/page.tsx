@@ -24,6 +24,7 @@ import {
     CheckCircle,
     FileText,
     RefreshCw,
+    Truck,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -146,12 +147,30 @@ export default function MRPPage() {
         },
     });
 
+    // Mutation for receiving goods from purchase requisition
+    const receiveGoodsMutation = useMutation({
+        mutationFn: async (prNumber: string) => {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/mrp/purchase-requisitions/${prNumber}/receive-goods`
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["purchase-requisitions"] });
+            queryClient.invalidateQueries({ queryKey: ["materials"] });
+        },
+    });
+
     const handleRunMRP = () => {
         runMRPMutation.mutate();
     };
 
     const handleConvertOrder = (plannedOrderId: string) => {
         convertOrderMutation.mutate(plannedOrderId);
+    };
+
+    const handleReceiveGoods = (prNumber: string) => {
+        receiveGoodsMutation.mutate(prNumber);
     };
 
     return (
@@ -355,6 +374,7 @@ export default function MRPPage() {
                                             <TableHead>Quantity</TableHead>
                                             <TableHead>Delivery Date</TableHead>
                                             <TableHead>Status</TableHead>
+                                            <TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -369,9 +389,22 @@ export default function MRPPage() {
                                                     {new Date(req.delivery_date).toLocaleDateString()}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant={req.status === "OPEN" ? "default" : "secondary"}>
+                                                    <Badge variant={req.status === "OPEN" ? "default" : req.status === "RECEIVED" ? "secondary" : "outline"}>
                                                         {req.status}
                                                     </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {req.status === "OPEN" && (
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => handleReceiveGoods(req.pr_number)}
+                                                            disabled={receiveGoodsMutation.isPending}
+                                                            className="flex items-center gap-1"
+                                                        >
+                                                            <Truck className="h-3 w-3" />
+                                                            Receive Goods
+                                                        </Button>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))}

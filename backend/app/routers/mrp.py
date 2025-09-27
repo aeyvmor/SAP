@@ -295,6 +295,77 @@ def convert_planned_order_to_production_order(
         "production_order_id": production_order_id
     }
 
+@router.post("/purchase-requisitions/{pr_number}/receive-goods")
+def receive_goods_from_purchase_requisition(
+    pr_number: str,
+    db: Session = Depends(get_db)
+):
+    """Simulate goods receipt from a purchase requisition (demo functionality)"""
+    pr = db.query(models.PurchaseRequisition).filter(
+        models.PurchaseRequisition.pr_number == pr_number
+    ).first()
+
+    if not pr:
+        raise HTTPException(status_code=404, detail="Purchase requisition not found")
+
+    if pr.status != "OPEN":
+        raise HTTPException(status_code=400, detail="Purchase requisition is not in OPEN status")
+
+    # Update stock level
+    stock = db.query(models.Stock).filter(
+        models.Stock.material_id == pr.material_id,
+        models.Stock.plant == pr.plant
+    ).first()
+
+    if stock:
+        stock.on_hand += pr.quantity
+    else:
+        # Create stock record if it doesn't exist
+        stock = models.Stock(
+            id=f"{pr.material_id}_{pr.plant}_0001",
+            material_id=pr.material_id,
+            plant=pr.plant,
+            storage_location="0001",
+            on_hand=pr.quantity,
+            safety_stock=0.0
+        )
+        db.add(stock)
+
+    # Update material current stock
+    material = db.query(models.Material).filter(
+        models.Material.materialId == pr.material_id
+    ).first()
+
+    if material:
+        material.currentStock += pr.quantity
+
+    # Mark PR as received
+    pr.status = "RECEIVED"
+
+    # Create goods movement record
+    goods_receipt = models.GoodsMovement(
+        id=f"GR{uuid.uuid4().hex[:8].upper()}",
+        movement_type="RECEIPT",
+        material_id=pr.material_id,
+        qty=pr.quantity,
+        plant=pr.plant,
+        storage_loc="0001",
+        reference=f"Goods receipt from PR {pr_number}",
+        timestamp=datetime.now()
+    )
+    db.add(goods_receipt)
+
+    db.commit()
+
+    return {
+        "message": "Goods received successfully",
+        "pr_number": pr_number,
+        "material_id": pr.material_id,
+        "quantity_received": pr.quantity,
+        "new_stock_level": stock.on_hand if stock else pr.quantity,
+        "goods_receipt_id": goods_receipt.id
+    }
+
 @router.get("/runs/history")
 def get_mrp_run_history(
     plant: str = None,
