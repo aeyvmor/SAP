@@ -110,7 +110,7 @@ def generate_materials():
             materialId=material_id,
             description=part,
             type=models.MaterialType.RAW,
-            currentStock=random.randint(50, 1000),
+            currentStock=0,  # Set to 0 for MRP testing
             minStock=random.randint(10, 50),
             maxStock=random.randint(500, 2000),
             unitOfMeasure="EA",
@@ -128,7 +128,7 @@ def generate_materials():
             materialId=material_id,
             description=product,
             type=models.MaterialType.FINISHED,
-            currentStock=random.randint(0, 50),
+            currentStock=0,  # Set to 0 for MRP testing
             minStock=10,
             maxStock=100,
             unitOfMeasure="EA",
@@ -372,6 +372,78 @@ def seed_operation_confirmations(db: Session):
     db.commit()
     print(f"Seeded {len(confirmations)} operation confirmations.")
 
+def generate_boms():
+    """Generate BOMs for iPhone products"""
+    boms = []
+
+    # iPhone 15 Pro BOM - what components go into it
+    iphone_15_pro_bom = models.BOMHeader(
+        bom_id="BOM_IPHONE_15_PRO_001",
+        parent_material_id="IPHONE_15_PRO",
+        version="001"
+    )
+    boms.append(iphone_15_pro_bom)
+
+    # Components for iPhone 15 Pro
+    components = [
+        ("6.1-INCH_SUPER_RETINA_XDR_DISPLAY", 1.0),
+        ("A17_PRO_BIONIC_CHIP", 1.0),
+        ("4323MAH_LITHIUM-ION_BATTERY", 1.0),
+        ("STAINLESS_STEEL_FRAME", 1.0),
+        ("12MP_ULTRA_WIDE_CAMERA", 2.0),  # Triple camera system
+        ("LIGHTNING_CHARGING_PORT", 1.0),
+        ("CERAMIC_SHIELD_FRONT_COVER", 1.0),
+        ("GLASS_BACK", 1.0),
+    ]
+
+    bom_items = []
+    for component_id, quantity in components:
+        item = models.BOMItem(
+            bom_item_id=f"{iphone_15_pro_bom.bom_id}_{component_id}",
+            bom_id=iphone_15_pro_bom.bom_id,
+            component_material_id=component_id,
+            quantity=quantity,
+            position=len(bom_items) + 10  # SAP-style positioning
+        )
+        bom_items.append(item)
+
+    return boms, bom_items
+
+def generate_stock(db: Session):
+    """Generate stock records for all materials"""
+    stock_records = []
+
+    # Get all materials
+    materials = db.query(models.Material).all()
+
+    for material in materials:
+        # Create stock record for each material
+        stock_record = models.Stock(
+            id=f"{material.materialId}_1000_0001",  # Unique ID combining material, plant, storage
+            material_id=material.materialId,
+            plant=material.plant,
+            storage_location=material.storageLocation,
+            on_hand=float(material.currentStock),  # Now 0 for all materials
+            safety_stock=float(material.minStock)  # Use min stock as safety stock
+        )
+        stock_records.append(stock_record)
+
+    return stock_records
+
+def seed_boms(db: Session):
+    bom_headers, bom_items = generate_boms()
+    db.add_all(bom_headers)
+    db.commit()
+    db.add_all(bom_items)
+    db.commit()
+    print(f"Seeded {len(bom_headers)} BOM headers with {len(bom_items)} BOM items.")
+
+def seed_stock(db: Session):
+    stock_records = generate_stock(db)
+    db.add_all(stock_records)
+    db.commit()
+    print(f"Seeded {len(stock_records)} stock records.")
+
 def seed_order_change_history(db: Session):
     change_history = generate_order_change_history(db)
     db.add_all(change_history)
@@ -398,12 +470,15 @@ def main():
     
     try:
         seed_materials(db)
-        seed_production_orders(db)
+        seed_boms(db)
+        seed_stock(db)
         seed_work_centers(db)
         seed_routings(db)
-        seed_operation_confirmations(db)
-        seed_order_change_history(db)
+        # NOTE: Production orders, confirmations, and change history are NOT seeded initially
+        # This allows for a clean demo where users create their own demand first
         print("✓ Database seeding completed successfully!")
+        print("📝 Note: No production orders seeded - create your own demand to test MRP!")
+        print("🔧 BOMs seeded - MRP will now analyze component requirements!")
     except Exception as e:
         print(f"❌ Error during seeding: {e}")
         db.rollback()

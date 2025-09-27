@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from database import models, schemas, get_db
 from datetime import datetime, timedelta
 from typing import List
@@ -116,7 +117,7 @@ def run_mrp_enhanced(payload: schemas.MRPRunRequest, db: Session = Depends(get_d
                 # Get current stock
                 stock = db.query(models.Stock).filter(
                     models.Stock.material_id == material_id,
-                    models.Stock.plant == payload.plant or "1000"
+                    models.Stock.plant == (payload.plant or "1000")
                 ).first()
                 
                 on_hand = stock.on_hand if stock else 0.0
@@ -190,7 +191,7 @@ def run_mrp_legacy(payload: schemas.MRPRequest, db: Session = Depends(get_db)):
     for mat, req in material_reqs.items():
         stock = db.query(models.Stock).filter(
             models.Stock.material_id == mat,
-            models.Stock.plant == payload.plant
+            models.Stock.plant == (payload.plant or "1000")
         ).first()
         on_hand = stock.on_hand if stock else 0.0
         safety = stock.safety_stock if stock else 0.0
