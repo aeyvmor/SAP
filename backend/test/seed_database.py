@@ -56,6 +56,36 @@ def create_tables_if_missing():
         print(f"❌ Failed to create tables: {e}")
         return False
 
+def clear_database():
+    """Clear all data from database tables to ensure clean seeding"""
+    print("Clearing existing database data...")
+    try:
+        # Delete in reverse dependency order to handle foreign keys
+        db = next(get_db())
+        # Clear tables with foreign keys first
+        db.query(models.OperationConfirmation).delete()
+        db.query(models.OrderChangeHistory).delete()
+        db.query(models.Confirmation).delete()
+        db.query(models.GoodsMovement).delete()
+        db.query(models.StockMovement).delete()
+        db.query(models.PlannedOrder).delete()
+        db.query(models.PurchaseRequisition).delete()
+        db.query(models.Operation).delete()
+        db.query(models.Routing).delete()
+        db.query(models.BOMItem).delete()
+        db.query(models.BOMHeader).delete()
+        db.query(models.Stock).delete()
+        db.query(models.ProductionOrder).delete()
+        db.query(models.WorkCenter).delete()
+        db.query(models.Material).delete()
+        db.commit()
+        db.close()
+        print("✓ Database cleared successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to clear database: {e}")
+        return False
+
 def generate_materials():
     materials = []
     parts = [
@@ -343,6 +373,15 @@ def generate_order_change_history(db: Session):
 
 def seed_materials(db: Session):
     materials = generate_materials()
+    # Check existing materials
+    existing_count = db.query(models.Material).count()
+    print(f"Existing materials in database: {existing_count}")
+    print(f"Attempting to seed {len(materials)} materials.")
+    # Check for duplicates in generated data
+    material_ids = [m.materialId for m in materials]
+    duplicates_in_seed = len(material_ids) - len(set(material_ids))
+    if duplicates_in_seed > 0:
+        print(f"Warning: {duplicates_in_seed} duplicate materialIds in seed data.")
     db.add_all(materials)
     db.commit()
     print(f"Seeded {len(materials)} materials.")
@@ -477,8 +516,13 @@ def main():
             return
     
     print("\n=== STARTING DATA SEEDING ===")
+    # Clear existing data to ensure clean seeding
+    if not clear_database():
+        print("❌ Failed to clear database. Exiting.")
+        return
+
     db = next(get_db())
-    
+
     try:
         seed_materials(db)
         seed_boms(db)
