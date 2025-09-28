@@ -41,8 +41,7 @@ export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedTab, setSelectedTab] = useState("all");
     const queryClient = useQueryClient();
-    
-    // Modal states
+
     const [changeModalOpen, setChangeModalOpen] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
@@ -57,17 +56,17 @@ export default function OrdersPage() {
     } | null>(null);
 
     // Modal handlers
-    const handleChangeOrder = (order: typeof orders[0]) => {
+    const handleChangeOrder = (order: (typeof orders)[0]) => {
         setSelectedOrder(order);
         setChangeModalOpen(true);
     };
 
-    const handleConfirmOperation = (order: typeof orders[0]) => {
+    const handleConfirmOperation = (order: (typeof orders)[0]) => {
         setSelectedOrder(order);
         setConfirmModalOpen(true);
     };
 
-    const handleViewHistory = (order: typeof orders[0]) => {
+    const handleViewHistory = (order: (typeof orders)[0]) => {
         setSelectedOrder(order);
         setHistoryModalOpen(true);
     };
@@ -400,17 +399,26 @@ export default function OrdersPage() {
                                                             variant="outline"
                                                             className="h-8 px-2"
                                                             title="Change Order (CO02)"
-                                                            onClick={() => handleChangeOrder(order)}
+                                                            onClick={() =>
+                                                                handleChangeOrder(
+                                                                    order
+                                                                )
+                                                            }
                                                         >
                                                             <Edit className="h-3 w-3" />
                                                         </Button>
-                                                        {order.status === "IN_PROGRESS" && (
+                                                        {order.status ===
+                                                            "IN_PROGRESS" && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="outline"
                                                                 className="h-8 px-2"
                                                                 title="Confirm Operations (CO11N)"
-                                                                onClick={() => handleConfirmOperation(order)}
+                                                                onClick={() =>
+                                                                    handleConfirmOperation(
+                                                                        order
+                                                                    )
+                                                                }
                                                             >
                                                                 <CheckSquare className="h-3 w-3" />
                                                             </Button>
@@ -420,24 +428,37 @@ export default function OrdersPage() {
                                                             variant="outline"
                                                             className="h-8 px-2"
                                                             title="View History"
-                                                            onClick={() => handleViewHistory(order)}
+                                                            onClick={() =>
+                                                                handleViewHistory(
+                                                                    order
+                                                                )
+                                                            }
                                                         >
                                                             <History className="h-3 w-3" />
                                                         </Button>
-                                                        {order.status !== "COMPLETED" && (
+                                                        {order.status !==
+                                                            "COMPLETED" && (
                                                             <Button
                                                                 size="sm"
                                                                 className="h-8 px-2"
                                                                 title="Complete Order (Auto GI/GR)"
-                                                                onClick={() => completeMutation.mutate(order.orderId)}
-                                                                disabled={completeMutation.isPending}
+                                                                onClick={() =>
+                                                                    completeMutation.mutate(
+                                                                        order.orderId
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    completeMutation.isPending
+                                                                }
                                                             >
-                                                                {completeMutation.isPending ? "Completing..." : "Complete"}
+                                                                {completeMutation.isPending
+                                                                    ? "Completing..."
+                                                                    : "Complete"}
                                                             </Button>
                                                         )}
                                                     </div>
                                                 </TableCell>
-                                           </TableRow>
+                                            </TableRow>
                                         );
                                     })}
                                 </TableBody>
@@ -475,7 +496,7 @@ export default function OrdersPage() {
                     />
                 </>
             )}
-            
+
             <OrderHistoryModal
                 isOpen={historyModalOpen}
                 onClose={() => setHistoryModalOpen(false)}

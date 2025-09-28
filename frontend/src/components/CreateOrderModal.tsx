@@ -18,9 +18,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Plus } from "lucide-react";
+import MaterialCombobox from "@/components/MaterialCombobox";
 
 type OrderPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
@@ -36,7 +37,19 @@ interface NewOrder {
 
 export default function CreateOrderModal() {
     const [isOpen, setIsOpen] = useState(false);
+    const [materialId, setMaterialId] = useState("");
     const queryClient = useQueryClient();
+
+    // Query for materials to populate the combobox
+    const { data: materials = [] } = useQuery({
+        queryKey: ["materials"],
+        queryFn: async () => {
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/materials`
+            );
+            return response.data;
+        },
+    });
 
     const mutation = useMutation({
         mutationFn: (newOrder: NewOrder) => {
@@ -53,7 +66,7 @@ export default function CreateOrderModal() {
     });
 
     const resetForm = () => {
-        // Reset form will happen automatically since we're using controlled inputs
+        setMaterialId("");
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,10 +74,12 @@ export default function CreateOrderModal() {
         const formData = new FormData(e.currentTarget);
 
         const newOrder: NewOrder = {
-            material_id: String(formData.get("materialId") || ""),
+            material_id: materialId,
             quantity: parseInt(String(formData.get("quantity") || "0"), 10),
             due_date: String(formData.get("dueDate") || ""),
-            priority: String(formData.get("priority") || "MEDIUM") as OrderPriority,
+            priority: String(
+                formData.get("priority") || "MEDIUM"
+            ) as OrderPriority,
             description: String(formData.get("description") || ""),
             costCenter: String(formData.get("costCenter") || "CC001"),
             plant: String(formData.get("plant") || "1000"),
@@ -88,15 +103,34 @@ export default function CreateOrderModal() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="materialId">Material ID</Label>
-                        <Input id="materialId" name="materialId" required placeholder="e.g., IPHONE_13" />
+                        <MaterialCombobox
+                            materials={materials}
+                            value={materialId}
+                            onChange={setMaterialId}
+                            placeholder="Select existing material or enter custom Material ID"
+                            required
+                            id="materialId"
+                            name="materialId"
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="quantity">Quantity</Label>
-                        <Input id="quantity" name="quantity" type="number" required min="1" />
+                        <Input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            required
+                            min="1"
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="dueDate">Due Date</Label>
-                        <Input id="dueDate" name="dueDate" type="datetime-local" required />
+                        <Input
+                            id="dueDate"
+                            name="dueDate"
+                            type="datetime-local"
+                            required
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="priority">Priority</Label>
@@ -114,11 +148,19 @@ export default function CreateOrderModal() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
-                        <Input id="description" name="description" placeholder="Optional description" />
+                        <Input
+                            id="description"
+                            name="description"
+                            placeholder="Optional description"
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="costCenter">Cost Center</Label>
-                        <Input id="costCenter" name="costCenter" defaultValue="CC001" />
+                        <Input
+                            id="costCenter"
+                            name="costCenter"
+                            defaultValue="CC001"
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="plant">Plant</Label>

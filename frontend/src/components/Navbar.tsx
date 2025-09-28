@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    ChartAreaIcon,
     LayoutDashboard,
     Package,
     Wrench,
@@ -13,9 +12,9 @@ import { usePathname } from "next/navigation";
 
 const navigation = [
     {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
+        title: "MRP Planning",
+        url: "/mrp",
+        icon: Calculator,
     },
     {
         title: "Orders",
@@ -28,14 +27,9 @@ const navigation = [
         icon: Wrench,
     },
     {
-        title: "MRP Planning",
-        url: "/mrp",
-        icon: Calculator,
-    },
-    {
-        title: "Analytics",
-        url: "/analytics",
-        icon: ChartAreaIcon,
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
     },
 ];
 

@@ -4,12 +4,20 @@ import {
     LayoutDashboard,
     Package,
     Wrench,
-    TrendingUp,
     LucideApple,
+    Calculator,
 } from "lucide-react";
 
 export default function Home() {
     const features = [
+        {
+            title: "MRP Planning",
+            description:
+                "Optimize material requirements and planning processes",
+            icon: Calculator,
+            color: "from-purple-500 to-purple-600",
+            href: "/mrp",
+        },
         {
             title: "Real-time Dashboard",
             description: "Monitor production metrics and KPIs in real-time",
@@ -30,13 +38,6 @@ export default function Home() {
             icon: Wrench,
             color: "from-orange-500 to-orange-600",
             href: "/materials",
-        },
-        {
-            title: "Analytics & Insights",
-            description: "Data-driven insights for better decision making",
-            icon: TrendingUp,
-            color: "from-purple-500 to-purple-600",
-            href: "/analytics",
         },
     ];
 
