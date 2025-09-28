@@ -46,13 +46,7 @@ This is a **SAP-inspired Manufacturing Execution System (MES)** that simulates c
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Frontend** | Next.js 15.5 | React-based UI framework |
-| | TypeScript | Type-safe development |
-| | TailwindCSS | Utility-first CSS |
-| | Tanstack Query | Data fetching & caching |
-| | Radix UI | Accessible component primitives |
 | **Backend** | FastAPI | High-performance Python web framework |
-| | SQLAlchemy 2.0 | ORM for database operations |
-| | Pydantic | Data validation & serialization |
 | | WebSockets | Real-time communication |
 | **Database** | PostgreSQL 15 | Relational database |
 | **Infrastructure** | Docker Compose | Container orchestration |
