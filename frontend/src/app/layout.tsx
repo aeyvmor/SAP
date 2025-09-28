@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import QueryProvider from "@/components/QueryProvider";
 
 const geistSans = Geist({
@@ -30,6 +31,7 @@ export default function RootLayout({
                         enableSystem
                     >
                         <Navbar />
+                        <ThemeToggle />
                         <div className="mt-32 flex-1 flex justify-center px-5 py-10 overflow-auto">
                             {children}
                         </div>
