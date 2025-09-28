@@ -16,7 +16,7 @@ This is a **SAP-inspired Manufacturing Execution System (MES)** that simulates c
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Frontend (Next.js)                    │
+│                    Frontend (Next.js)                   │
 ├─────────────────────────────────────────────────────────┤
 │  Dashboard │ Materials │ Orders │ MRP │ Analytics       │
 └─────────────────────────────────────────────────────────┘
@@ -24,20 +24,20 @@ This is a **SAP-inspired Manufacturing Execution System (MES)** that simulates c
                      REST API + WebSocket
                             │
 ┌─────────────────────────────────────────────────────────┐
-│                   Backend (FastAPI)                      │
+│                   Backend (FastAPI)                     │
 ├─────────────────────────────────────────────────────────┤
 │  Routers: Materials, Orders, MRP, BOM, Work Centers     │
-│  Business Logic: Order Processing, Stock Management      │
-│  WebSocket Manager: Real-time Updates                    │
+│  Business Logic: Order Processing, Stock Management     │
+│  WebSocket Manager: Real-time Updates                   │
 └─────────────────────────────────────────────────────────┘
                             │
-                      PostgreSQL
+                        PostgreSQL
                             │
 ┌─────────────────────────────────────────────────────────┐
-│                    Database Layer                        │
+│                    Database Layer                       │
 ├─────────────────────────────────────────────────────────┤
-│  Tables: Materials, Production Orders, Stock, BOM,       │
-│  Routings, Operations, Confirmations, Movements          │
+│  Tables: Materials, Production Orders, Stock, BOM,      │
+│  Routings, Operations, Confirmations, Movements         │
 └─────────────────────────────────────────────────────────┘
 ```
 

@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP Manufacturing Execution System - Capstone Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom right, #f1f5f9, #e2e8f0);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .progress-text {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+        
+        .progress-bar {
+            width: 12rem;
+            height: 0.5rem;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+        
+        .main-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .slide-container {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            min-height: 600px;
+            position: relative;
+            padding: 2rem;
+        }
+        
+        .nav-buttons {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .nav-button {
+            padding: 0.75rem;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .nav-button:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .nav-button:not(:disabled):hover {
+            background: #2563eb;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-button:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .slide-navigator {
+            margin-top: 1.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
+        
+        .slide-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .slide-button {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .slide-button.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .slide-button:not(.active) {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .slide-button:not(.active):hover {
+            background: #e2e8f0;
+        }
+        
+        .controls-info {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        /* Slide content styles */
+        .slide-content {
+            height: 100%;
+            min-height: 500px;
+        }
+        
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .title-slide h2 {
+            font-size: 1.5rem;
+            color: #475569;
+            margin-bottom: 2rem;
+        }
+        
+        .title-slide .author-info {
+            font-size: 1.125rem;
+            color: #64748b;
+        }
+        
+        .content-slide h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-right: 1rem;
+            color: #3b82f6;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .card {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .card-blue {
+            background: #eff6ff;
+        }
+        
+        .card-green {
+            background: #f0fdf4;
+        }
+        
+        .card-amber {
+            background: #fffbeb;
+        }
+        
+        .card-slate {
+            background: #f8fafc;
+        }
+        
+        .card-purple {
+            background: #faf5ff;
+        }
+        
+        .card-red {
+            background: #fef2f2;
+        }
+        
+        .card h3 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .card-blue h3 { color: #1e3a8a; }
+        .card-green h3 { color: #14532d; }
+        .card-amber h3 { color: #78350f; }
+        .card-slate h3 { color: #1e293b; }
+        .card-purple h3 { color: #581c87; }
+        .card-red h3 { color: #7f1d1d; }
+        
+        .list {
+            list-style: none;
+        }
+        
+        .list-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #334155;
+        }
+        
+        .bullet {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            background: #3b82f6;
+        }
+        
+        .code-block {
+            background: #0f172a;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .code-block h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .code {
+            font-family: 'Courier New', monospace;
+            color: #4ade80;
+            font-size: 0.75rem;
+            white-space: pre;
+        }
+        
+        .table {
+            width: 100%;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .table thead {
+            background: #f8fafc;
+        }
+        
+        .table th {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        
+        .table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.5rem;
+            background: #dbeafe;
+            color: #1e3a8a;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin: 0.125rem;
+        }
+        
+        .phase-box {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .phase-box h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+        
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .step-box {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            text-align: center;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            .step-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Icon styles */
+        .icon-server::before { content: "🖥️"; }
+        .icon-package::before { content: "📦"; }
+        .icon-database::before { content: "🗄️"; }
+        .icon-layers::before { content: "📚"; }
+        .icon-settings::before { content: "⚙️"; }
+        .icon-branch::before { content: "🌿"; }
+        .icon-cpu::before { content: "🔧"; }
+        .icon-code::before { content: "💻"; }
+        .icon-network::before { content: "🌐"; }
+        .icon-globe::before { content: "🌍"; }
+        .icon-monitor::before { content: "🖥️"; }
+        .icon-zap::before { content: "⚡"; }
+        .icon-shield::before { content: "🛡️"; }
+        .icon-test::before { content: "🧪"; }
+        .icon-chart::before { content: "📊"; }
+        
+        .center-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        
+        .thank-you-box {
+            background: #1e293b;
+            color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .thank-you-box h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .thank-you-box p {
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <span class="icon icon-server"></span>
+                <div>
+                    <div class="header-title">SAP MES Capstone</div>
+                    <div class="header-subtitle">Technical Architecture Presentation</div>
+                </div>
+            </div>
+            <div class="progress-info">
+                <span class="progress-text" id="slideCounter">1 / 22</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 4.5%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="slide-container">
+            <div class="slide-content" id="slideContent">
+                <!-- Slide content will be inserted here -->
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-button" id="prevButton" onclick="prevSlide()">
+                    ←
+                </button>
+                <button class="nav-button" id="nextButton" onclick="nextSlide()">
+                    →
+                </button>
+            </div>
+        </div>
+
+        <div class="slide-navigator">
+            <div class="slide-buttons" id="slideButtons">
+                <!-- Slide buttons will be inserted here -->
+            </div>
+        </div>
+
+        <div class="controls-info">
+            <p>Use arrow keys or click navigation buttons to move between slides</p>
+            <p>Press F11 for full-screen presentation mode</p>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        
+        const slides = [
+            {
+                id: 1,
+                type: "title",
+                content: {
+                    title: "SAP Manufacturing Execution System",
+                    subtitle: "Capstone Project - System Architecture & Implementation",
+                    author: "Your Name",
+                    course: "Course & Date"
+                }
+            },
+            {
+                id: 2,
+                type: "overview",
+                title: "Project Overview",
+                content: {
+                    built: "Manufacturing Execution System (MES) inspired by SAP PP module",
+                    scope: "Full-stack web application with real-time capabilities",
+                    achievement: "Complete production planning and control system",
+                    technical: [
+                        "Modern 3-tier architecture",
+                        "Real-time WebSocket communication",
+                        "Complex business process automation",
+                        "Database design for manufacturing workflows"
+                    ]
+                }
+            },
+            {
+                id: 3,
+                type: "background",
+                title: "SAP Background & Terminology",
+                content: {
+                    context: {
+                        "SAP PP": "Production Planning module in SAP ERP",
+                        "MES": "Manufacturing Execution System - bridges planning and shop floor",
+                        "MRP": "Material Requirements Planning - automated procurement planning"
+                    },
+                    concepts: {
+                        "Production Order": "Work instruction for manufacturing",
+                        "BOM": "Bill of Materials - recipe/components needed",
+                        "Goods Movement": "Inventory transactions (Issue/Receipt)",
+                        "Stock Management": "Real-time inventory tracking"
+                    },
+                    importance: "SAP dominates enterprise manufacturing (77% of Fortune 500)"
+                }
+            },
+            {
+                id: 4,
+                type: "architecture",
+                title: "System Architecture Overview",
+                content: {
+                    layers: [
+                        {
+                            name: "Frontend (Next.js 15)",
+                            components: ["Dashboard", "Materials", "Orders", "MRP", "Analytics"],
+                            tech: ["React Components with TypeScript", "TailwindCSS + Radix UI", "Tanstack Query for data management"]
+                        },
+                        {
+                            name: "Backend (FastAPI)",
+                            components: ["API Routers", "Business Logic", "WebSocket Manager"],
+                            tech: ["Pydantic validation", "SQLAlchemy ORM", "Async request handling"]
+                        },
+                        {
+                            name: "Database (PostgreSQL)",
+                            components: ["Production Orders", "Materials", "Stock", "BOM", "Movements"],
+                            tech: ["ACID compliance", "Complex relationships", "Performance optimized"]
+                        }
+                    ],
+                    decisions: [
+                        "3-Tier Design: Separation of concerns, scalability",
+                        "API-First: RESTful services with automatic documentation",
+                        "Real-time Layer: WebSocket for live updates"
+                    ]
+                }
+            },
+            {
+                id: 5,
+                type: "tech_stack",
+                title: "Technology Stack & Rationale",
+                content: {
+                    stack: [
+                        { component: "Frontend Framework", tech: "Next.js 15 + TypeScript", reason: "SSR capabilities, type safety, modern React patterns" },
+                        { component: "State Management", tech: "Tanstack Query", reason: "Server state caching, optimistic updates" },
+                        { component: "Styling", tech: "TailwindCSS + Radix UI", reason: "Utility-first CSS, accessible components" },
+                        { component: "Backend Framework", tech: "FastAPI", reason: "High performance, automatic API docs, async support" },
+                        { component: "ORM", tech: "SQLAlchemy 2.0", reason: "Mature ORM, supports complex queries, migrations" },
+                        { component: "Database", tech: "PostgreSQL 15", reason: "ACID compliance, JSON support, performance" },
+                        { component: "Real-time", tech: "WebSockets", reason: "Bi-directional communication, low latency" },
+                        { component: "Containerization", tech: "Docker Compose", reason: "Development consistency, easy deployment" }
+                    ],
+                    choices: ["Async/Await: Non-blocking operations", "Type Safety: TypeScript + Pydantic schemas", "Modern Patterns: Hooks, composition, dependency injection"]
+                }
+            },
+            {
+                id: 6,
+                type: "database",
+                title: "Database Schema Design",
+                content: {
+                    entities: [
+                        { name: "Materials", fields: ["material_id (PK)", "description", "material_type", "current_stock", "min_stock", "created_at"] },
+                        { name: "Production Orders", fields: ["order_id (PK)", "material_id (FK)", "quantity", "status", "priority", "due_date"] },
+                        { name: "BOM_Header", fields: ["bom_id (PK)", "parent_material", "version", "is_active"] },
+                        { name: "BOM_Items", fields: ["item_id (PK)", "bom_id (FK)", "component_id", "quantity", "unit_of_measure"] },
+                        { name: "Goods_Movements", fields: ["movement_id (PK)", "material_id (FK)", "movement_type", "quantity", "order_id (FK)", "timestamp"] }
+                    ],
+                    principles: [
+                        "Normalized Structure: Reduces data redundancy",
+                        "Foreign Key Constraints: Ensures referential integrity",
+                        "Audit Trail: Complete transaction history",
+                        "Flexible BOM: Supports multi-level product structures"
+                    ]
+                }
+            },
+            {
+                id: 7,
+                type: "process_flow",
+                title: "Production Order Lifecycle",
+                content: {
+                    states: ["CREATED", "RELEASED", "IN_PROGRESS", "COMPLETED"],
+                    actions: ["Create Order", "Release to Floor", "Confirm Operations", "Complete & Issue"],
+                    features: [
+                        "Immutable Transitions: Prevent invalid state changes",
+                        "Event-Driven: Each transition triggers downstream processes",
+                        "Audit Trail: Complete history of status changes"
+                    ],
+                    code: `def transition_order_status(order_id, new_status):
+    valid_transitions = {
+        "CREATED": ["RELEASED", "CANCELLED"],
+        "RELEASED": ["IN_PROGRESS", "CANCELLED"],
+        "IN_PROGRESS": ["COMPLETED", "CANCELLED"]
+    }
+    
+    current_status = get_order_status(order_id)
+    if new_status not in valid_transitions[current_status]:
+        raise InvalidTransitionError()`
+                }
+            },
+            {
+                id: 8,
+                type: "algorithm",
+                title: "MRP Algorithm Implementation",
+                content: {
+                    steps: [
+                        "Initialize Planning Data (horizon, orders, stock)",
+                        "Calculate Gross Requirements (explode BOM recursively)",
+                        "Net Requirements Planning (current stock vs needs)",
+                        "Generate Procurement (planned orders vs purchase reqs)"
+                    ],
+                    complexity: {
+                        time: "O(n × m) where n = orders, m = avg BOM levels",
+                        space: "O(materials) for requirements tracking",
+                        optimization: "Cached BOM explosion, indexed queries"
+                    },
+                    code: `def run_mrp(planning_horizon_days, plant):
+    # Get active orders in horizon
+    active_orders = get_orders_in_horizon(planning_horizon_days)
+    
+    # Calculate requirements
+    for order in active_orders:
+        # Explode BOM recursively
+        components = explode_bom(order.material_id, order.quantity)
+        
+        # Check stock and create procurement
+        for material, qty in components.items():
+            shortage = qty - get_stock(material)
+            if shortage > 0:
+                create_procurement(material, shortage)`
+                }
+            },
+            {
+                id: 9,
+                type: "bom_algorithm",
+                title: "BOM Explosion Algorithm",
+                content: {
+                    code: `def explode_bom(material_id, quantity, level=0):
+    """Recursively explode Bill of Materials"""
+    requirements = {}
+    
+    # Get BOM for this material
+    bom = get_active_bom(material_id)
+    if not bom:
+        return requirements
+    
+    # Process each component
+    for component in bom.items:
+        component_qty = component.quantity * quantity
+        
+        # Add to requirements
+        requirements[component.material_id] = 
+            requirements.get(component.material_id, 0) + component_qty
+        
+        # Recursively explode sub-components
+        if level < MAX_BOM_LEVELS:
+            sub_requirements = explode_bom(
+                component.material_id, component_qty, level + 1
+            )
+            
+            # Merge sub-requirements
+            for mat_id, qty in sub_requirements.items():
+                requirements[mat_id] = 
+                    requirements.get(mat_id, 0) + qty
+    
+    return requirements`,
+                    challenges: [
+                        "Circular Dependencies: Level-based recursion limit",
+                        "Performance: Memoization of BOM structures",
+                        "Data Integrity: Validation of BOM relationships"
+                    ]
+                }
+            },
+            {
+                id: 10,
+                type: "realtime",
+                title: "Real-time Communication Architecture",
+                content: {
+                    architecture: "WebSocket Manager with Connection Pool",
+                    events: ["order_created", "order_updated", "stock_changed", "mrp_completed"],
+                    code: `class WebSocketManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+    
+    async def broadcast(self, event_type: str, data: dict):
+        """Broadcast event to all connected clients"""
+        message = {"type": event_type, "data": data}
+        
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except ConnectionClosed:
+                self.active_connections.remove(connection)`,
+                    features: [
+                        "Connection pool management",
+                        "Event broadcasting",
+                        "Room-based filtering",
+                        "Auto-reconnection handling"
+                    ]
+                }
+            },
+            {
+                id: 11,
+                type: "goods_movement",
+                title: "Goods Movement Process Flow",
+                content: {
+                    phases: [
+                        {
+                            name: "GOODS ISSUE PHASE",
+                            steps: ["Validate stock", "Reduce inventory", "Create ISSUE movement", "Update material master"]
+                        },
+                        {
+                            name: "GOODS RECEIPT PHASE",
+                            steps: ["Increase inventory", "Create RECEIPT movement", "Update material master"]
+                        },
+                        {
+                            name: "ORDER STATUS UPDATE",
+                            steps: ["Set status = COMPLETED", "Set progress = 100%", "Record actual end date", "Broadcast WebSocket"]
+                        }
+                    ],
+                    transaction: "@transactional decorator ensures data consistency with automatic rollback on failure"
+                }
+            },
+            {
+                id: 12,
+                type: "api_design",
+                title: "API Architecture & Design Patterns",
+                content: {
+                    endpoints: [
+                        { path: "/api/materials", methods: ["GET", "POST", "PUT"], purpose: "Material management" },
+                        { path: "/api/production-orders", methods: ["GET", "POST"], purpose: "Order CRUD" },
+                        { path: "/api/production-orders/{id}/release", methods: ["POST"], purpose: "State transitions" },
+                        { path: "/api/mrp/run", methods: ["POST"], purpose: "Execute MRP algorithm" },
+                        { path: "/api/analytics/metrics", methods: ["GET"], purpose: "Dashboard KPIs" }
+                    ],
+                    patterns: [
+                        "Repository Pattern: Database abstraction",
+                        "Service Layer: Business logic separation",
+                        "DTO Pattern: Pydantic schemas for validation",
+                        "Observer Pattern: WebSocket event notifications"
+                    ]
+                }
+            },
+            {
+                id: 13,
+                type: "frontend",
+                title: "Frontend Architecture & State Management",
+                content: {
+                    structure: [
+                        "Layout > Dashboard > MetricsCard, OrderStatusChart",
+                        "Layout > Materials > MaterialList, MaterialForm",
+                        "Layout > ProductionOrders > OrderTable, OrderForm, OrderDetails",
+                        "Layout > MRP > MRPSettings, MRPResults"
+                    ],
+                    state_management: `// Tanstack Query for server state
+const { data: orders, isLoading } = useQuery({
+  queryKey: ['orders'],
+  queryFn: () => apiClient.getOrders(),
+  refetchInterval: 30000 // Auto-refresh
+});
+
+// WebSocket for real-time updates
+useEffect(() => {
+  const ws = new WebSocket('/ws');
+  ws.onmessage = (event) => {
+    const { type, data } = JSON.parse(event.data);
+    if (type === 'order_updated') {
+      queryClient.invalidateQueries(['orders']);
+    }
+  };
+}, []);`
+                }
+            },
+            {
+                id: 14,
+                type: "performance",
+                title: "Performance Optimization Techniques",
+                content: {
+                    database: [
+                        "Indexing Strategy: Compound indexes on frequently queried columns",
+                        "Query Optimization: Eager loading for N+1 problem prevention",
+                        "Connection Pooling: Managed database connections"
+                    ],
+                    frontend: [
+                        "Code Splitting: Route-based lazy loading",
+                        "Memoization: React.memo and useMemo for expensive computations",
+                        "Virtual Scrolling: Large dataset rendering"
+                    ],
+                    backend: [
+                        "Async Processing: Non-blocking I/O operations",
+                        "Caching Layer: In-memory caching for frequently accessed data",
+                        "Background Tasks: Async MRP processing"
+                    ]
+                }
+            },
+            {
+                id: 15,
+                type: "error_handling",
+                title: "Error Handling & Validation Architecture",
+                content: {
+                    layers: [
+                        "Frontend Validation (TypeScript)",
+                        "API Schema Validation (Pydantic)",
+                        "Business Rule Validation (Python)",
+                        "Database Constraints (PostgreSQL)"
+                    ],
+                    exceptions: `class MESException(Exception):
+    """Base exception for MES system"""
+    pass
+
+class OrderValidationError(MESException):
+    """Order-specific validation errors"""
+    pass
+
+@app.exception_handler(MESException)
+async def mes_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"error": str(exc), "type": type(exc).__name__}
+    )`,
+                    validation: `class ProductionOrderCreate(BaseModel):
+    material_id: str = Field(..., regex=r'^MAT\\d{6}$')
+    quantity: int = Field(..., gt=0, le=1000000)
+    due_date: datetime = Field(..., ge=datetime.now())
+    priority: OrderPriority`
+                }
+            },
+            {
+                id: 16,
+                type: "testing",
+                title: "Testing Strategy & Implementation",
+                content: {
+                    pyramid: ["E2E Tests (5%) - Playwright", "Integration Tests (15%) - FastAPI", "Unit Tests (80%) - pytest + Jest"],
+                    examples: `# Unit Tests - Business Logic
+def test_mrp_calculation():
+    assert calculate_requirements(orders, stock) == expected_result
+
+# Integration Tests - API Endpoints
+def test_create_production_order():
+    response = client.post("/api/production-orders", json=order_data)
+    assert response.status_code == 201
+
+# Frontend Tests - Component Logic
+test('OrderForm validates required fields', () => {
+    render(<OrderForm />);
+    expect(screen.getByText('Material is required')).toBeInTheDocument();
+});`,
+                    coverage: [
+                        "Backend: 90%+ line coverage",
+                        "Frontend: 80%+ component coverage",
+                        "Critical Paths: 100% coverage (MRP, order completion)"
+                    ]
+                }
+            },
+            {
+                id: 17,
+                type: "deployment",
+                title: "Deployment & DevOps Architecture",
+                content: {
+                    docker: `FROM node:18-alpine as frontend-build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM python:3.11-slim as backend
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]`,
+                    compose: "Multi-service orchestration with frontend, backend, and database",
+                    production: [
+                        "Health Checks: Application readiness probes",
+                        "Logging: Structured JSON logging with correlation IDs",
+                        "Monitoring: Application metrics and alerting",
+                        "Security: Environment variable management, secrets"
+                    ]
+                }
+            },
+            {
+                id: 18,
+                type: "challenges",
+                title: "Technical Challenges & Solutions",
+                content: {
+                    challenges: [
+                        {
+                            problem: "Complex MRP Algorithm",
+                            solution: "Recursive algorithm with memoization, database query optimization, background processing"
+                        },
+                        {
+                            problem: "Real-time Data Synchronization",
+                            solution: "WebSocket event broadcasting, optimistic UI updates, server-side state reconciliation"
+                        },
+                        {
+                            problem: "Transaction Management",
+                            solution: "Database transactions with proper isolation, compensating actions, event sourcing"
+                        },
+                        {
+                            problem: "Type Safety Across Stack",
+                            solution: "TypeScript + Pydantic schema generation, shared type definitions, automated API client"
+                        }
+                    ]
+                }
+            },
+            {
+                id: 19,
+                type: "tradeoffs",
+                title: "Architecture Trade-offs & Decisions",
+                content: {
+                    decisions: [
+                        {
+                            choice: "Monolith vs. Microservices",
+                            decision: "Monolithic backend with modular design",
+                            pros: ["Simpler deployment and debugging", "Consistent transactions across modules"],
+                            cons: ["Less independent scaling", "Technology lock-in"]
+                        },
+                        {
+                            choice: "REST vs. GraphQL",
+                            decision: "RESTful APIs with WebSocket layer",
+                            pros: ["Simple, well-understood patterns", "Auto-generated documentation", "WebSocket handles real-time needs"],
+                            cons: ["Over-fetching in some scenarios"]
+                        },
+                        {
+                            choice: "SQL vs. NoSQL",
+                            decision: "PostgreSQL relational database",
+                            pros: ["ACID transactions crucial for manufacturing", "Complex relational queries (BOM explosion)", "Mature tooling and performance"],
+                            cons: ["Less flexible schema evolution"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: 20,
+                type: "future",
+                title: "Future Architecture Evolution",
+                content: {
+                    microservices: ["Material Service", "Production Service", "MRP Service", "Notification Service"],
+                    enhancements: [
+                        "Event Sourcing: Complete audit trail with replay capability",
+                        "CQRS: Command Query Responsibility Segregation",
+                        "API Gateway: Centralized routing and security",
+                        "Service Mesh: Inter-service communication management"
+                    ],
+                    scalability: [
+                        "Horizontal Scaling: Load balancer + multiple instances",
+                        "Caching Layer: Redis for session and application data",
+                        "Database Sharding: Partition by plant/organization",
+                        "CDN Integration: Static asset delivery optimization"
+                    ]
+                }
+            },
+            {
+                id: 21,
+                type: "achievements",
+                title: "Key Technical Achievements",
+                content: {
+                    metrics: [
+                        "Lines of Code: ~15,000 (Frontend: 8K, Backend: 7K)",
+                        "Database Tables: 12 core entities with 25+ relationships",
+                        "API Endpoints: 35+ RESTful endpoints",
+                        "Real-time Events: 8 WebSocket event types",
+                        "Business Processes: 4 major workflows implemented"
+                    ],
+                    performance: [
+                        "Order Creation: <200ms response time",
+                        "MRP Execution: <5s for 1000+ orders",
+                        "WebSocket Latency: <50ms for status updates",
+                        "Database Queries: All critical queries <100ms"
+                    ],
+                    quality: [
+                        "Type Safety: 100% TypeScript + Pydantic coverage",
+                        "API Documentation: Auto-generated with OpenAPI",
+                        "Error Handling: Comprehensive exception hierarchy",
+                        "Logging: Structured logging with correlation IDs"
+                    ]
+                }
+            },
+            {
+                id: 22,
+                type: "questions",
+                title: "Questions & Technical Discussion",
+                content: {
+                    areas: [
+                        "Architecture Decisions: Why specific technologies chosen",
+                        "Algorithm Implementation: MRP and BOM explosion details",
+                        "Performance Optimization: Database and frontend techniques",
+                        "Error Handling: Multi-layer validation strategy",
+                        "Real-time Communication: WebSocket implementation",
+                        "Testing Strategy: Unit, integration, and E2E approaches"
+                    ],
+                    demo: [
+                        "Live System: Fully functional at http://localhost:3000",
+                        "Sample Data: Pre-loaded for realistic demonstration",
+                        "Performance Monitoring: Real-time metrics available"
+                    ]
+                }
+            }
+        ];
+
+        function renderSlideContent(slide) {
+            switch (slide.type) {
+                case 'title':
+                    return `
+                        <div class="title-slide">
+                            <div class="mb-8">
+                                <span class="icon icon-server" style="font-size: 5rem;"></span>
+                            </div>
+                            <h1>${slide.content.title}</h1>
+                            <h2>${slide.content.subtitle}</h2>
+                            <div class="author-info">
+                                <p>${slide.content.author}</p>
+                                <p>${slide.content.course}</p>
+                            </div>
+                        </div>
+                    `;
+
+                case 'overview':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-package"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <div class="card card-blue mb-4">
+                                        <h3>What We Built</h3>
+                                        <p>${slide.content.built}</p>
+                                    </div>
+                                    <div class="card card-green">
+                                        <h3>Key Achievement</h3>
+                                        <p>${slide.content.achievement}</p>
+                                    </div>
+                                </div>
+                                <div class="card card-slate">
+                                    <h3>Technical Scope</h3>
+                                    <ul class="list">
+                                        ${slide.content.technical.map(item => `
+                                            <li class="list-item">
+                                                <div class="bullet"></div>
+                                                ${item}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'background':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-database"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <div class="card card-blue mb-4">
+                                        <h3>SAP PP Module Context</h3>
+                                        ${Object.entries(slide.content.context).map(([key, value]) => `
+                                            <div style="margin-bottom: 0.75rem;">
+                                                <strong style="color: #1e3a8a;">${key}:</strong>
+                                                <span>${value}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="card card-amber">
+                                        <h3>Why This Matters</h3>
+                                        <p>${slide.content.importance}</p>
+                                    </div>
+                                </div>
+                                <div class="card card-green">
+                                    <h3>Key Manufacturing Concepts</h3>
+                                    ${Object.entries(slide.content.concepts).map(([key, value]) => `
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <strong style="color: #14532d;">${key}:</strong>
+                                            <span>${value}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'architecture':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-layers"></span> ${slide.title}</h1>
+                            ${slide.content.layers.map(layer => `
+                                <div class="phase-box">
+                                    <h3>${layer.name}</h3>
+                                    <div class="grid grid-cols-2">
+                                        <div>
+                                            <h4 style="font-weight: 500; margin-bottom: 0.5rem;">Components</h4>
+                                            ${layer.components.map(comp => `
+                                                <span class="badge">${comp}</span>
+                                            `).join('')}
+                                        </div>
+                                        <div>
+                                            <h4 style="font-weight: 500; margin-bottom: 0.5rem;">Technologies</h4>
+                                            <ul class="list">
+                                                ${layer.tech.map(tech => `
+                                                    <li class="list-item" style="font-size: 0.875rem;">
+                                                        <div class="bullet" style="width: 0.375rem; height: 0.375rem; background: #64748b;"></div>
+                                                        ${tech}
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            <div class="card card-green">
+                                <h3>Architecture Decisions</h3>
+                                <ul class="list">
+                                    ${slide.content.decisions.map(decision => `
+                                        <li class="list-item">
+                                            <div class="bullet" style="background: #22c55e;"></div>
+                                            ${decision}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'tech_stack':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-settings"></span> ${slide.title}</h1>
+                            <div style="overflow-x: auto;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Component</th>
+                                            <th>Technology</th>
+                                            <th>Technical Justification</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${slide.content.stack.map(item => `
+                                            <tr>
+                                                <td style="font-weight: 500;">${item.component}</td>
+                                                <td style="color: #2563eb; font-weight: 500;">${item.tech}</td>
+                                                <td>${item.reason}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card card-blue" style="margin-top: 1.5rem;">
+                                <h3>Key Technical Choices</h3>
+                                <ul class="list">
+                                    ${slide.content.choices.map(choice => `
+                                        <li class="list-item">
+                                            <div class="bullet"></div>
+                                            ${choice}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'database':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-database"></span> ${slide.title}</h1>
+                            <div style="overflow-x: auto;">
+                                ${slide.content.entities.map(entity => `
+                                    <div class="card card-slate" style="margin-bottom: 1rem;">
+                                        <h4 style="font-weight: 600; margin-bottom: 0.5rem;">${entity.name}</h4>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                            ${entity.fields.map(field => `
+                                                <span class="badge">${field}</span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="card card-blue" style="margin-top: 1.5rem;">
+                                <h3>Design Principles</h3>
+                                <ul class="list">
+                                    ${slide.content.principles.map(principle => `
+                                        <li class="list-item">
+                                            <div class="bullet"></div>
+                                            ${principle}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'process_flow':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-branch"></span> ${slide.title}</h1>
+                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                                ${slide.content.states.map((state, index) => `
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="background: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500;">
+                                            ${state}
+                                        </div>
+                                        ${index < slide.content.states.length - 1 ? '<span style="margin: 0 0.5rem;">→</span>' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">State Management Features</h3>
+                                    ${slide.content.features.map(feature => `
+                                        <div class="card card-green" style="margin-bottom: 1rem;">
+                                            <strong>${feature.split(':')[0]}:</strong>
+                                            ${feature.split(':')[1]}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="code-block">
+                                    <h3>Implementation</h3>
+                                    <pre class="code">${slide.content.code}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'algorithm':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-cpu"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Algorithm Steps</h3>
+                                    ${slide.content.steps.map((step, index) => `
+                                        <div style="display: flex; align-items: flex-start; margin-bottom: 1rem;">
+                                            <div style="background: #3b82f6; color: white; width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem;">
+                                                ${index + 1}
+                                            </div>
+                                            <div style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; flex: 1;">
+                                                ${step}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                    <div class="card card-amber">
+                                        <h4 style="font-weight: 500; margin-bottom: 0.5rem;">Complexity Analysis</h4>
+                                        <p style="font-size: 0.875rem;"><strong>Time:</strong> ${slide.content.complexity.time}</p>
+                                        <p style="font-size: 0.875rem;"><strong>Space:</strong> ${slide.content.complexity.space}</p>
+                                        <p style="font-size: 0.875rem;"><strong>Optimization:</strong> ${slide.content.complexity.optimization}</p>
+                                    </div>
+                                </div>
+                                <div class="code-block">
+                                    <h3>Implementation</h3>
+                                    <pre class="code">${slide.content.code}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'bom_algorithm':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-code"></span> ${slide.title}</h1>
+                            <div class="code-block">
+                                <h3>Recursive BOM Explosion</h3>
+                                <pre class="code">${slide.content.code}</pre>
+                            </div>
+                            <div class="card card-amber" style="margin-top: 1.5rem;">
+                                <h3>Implementation Challenges</h3>
+                                <ul class="list">
+                                    ${slide.content.challenges.map(challenge => `
+                                        <li class="list-item">
+                                            <div class="bullet"></div>
+                                            ${challenge}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'realtime':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-network"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <div class="card card-blue mb-4">
+                                        <h3>Architecture Overview</h3>
+                                        <p>${slide.content.architecture}</p>
+                                    </div>
+                                    <div class="card card-green">
+                                        <h3>Supported Events</h3>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                            ${slide.content.events.map(event => `
+                                                <span class="badge">${event}</span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="code-block">
+                                    <h3>WebSocket Manager</h3>
+                                    <pre class="code">${slide.content.code}</pre>
+                                </div>
+                            </div>
+                            <div class="card card-slate" style="margin-top: 1.5rem;">
+                                <h3>Key Features</h3>
+                                <ul class="list">
+                                    ${slide.content.features.map(feature => `
+                                        <li class="list-item">
+                                            <div class="bullet"></div>
+                                            ${feature}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'goods_movement':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-package"></span> ${slide.title}</h1>
+                            ${slide.content.phases.map(phase => `
+                                <div class="phase-box">
+                                    <h3>${phase.name}</h3>
+                                    <div class="step-grid">
+                                        ${phase.steps.map(step => `
+                                            <div class="step-box">
+                                                ${step}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                            <div class="card card-blue">
+                                <h3>Transaction Management</h3>
+                                <p>${slide.content.transaction}</p>
+                            </div>
+                        </div>
+                    `;
+
+                case 'api_design':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-globe"></span> ${slide.title}</h1>
+                            <div style="overflow-x: auto;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Endpoint</th>
+                                            <th>Methods</th>
+                                            <th>Purpose</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${slide.content.endpoints.map(endpoint => `
+                                            <tr>
+                                                <td style="font-weight: 500; color: #2563eb;">${endpoint.path}</td>
+                                                <td>
+                                                    ${endpoint.methods.map(method => `
+                                                        <span class="badge">${method}</span>
+                                                    `).join('')}
+                                                </td>
+                                                <td>${endpoint.purpose}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card card-green" style="margin-top: 1.5rem;">
+                                <h3>Design Patterns</h3>
+                                <ul class="list">
+                                    ${slide.content.patterns.map(pattern => `
+                                        <li class="list-item">
+                                            <div class="bullet"></div>
+                                            ${pattern}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'frontend':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-monitor"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Application Structure</h3>
+                                    ${slide.content.structure.map(structure => `
+                                        <div class="card card-slate" style="margin-bottom: 1rem;">
+                                            <p style="font-size: 0.875rem;">${structure}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="code-block">
+                                    <h3>State Management Pattern</h3>
+                                    <pre class="code">${slide.content.state_management}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'performance':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-zap"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-3">
+                                <div class="card card-blue">
+                                    <h3>Database Optimizations</h3>
+                                    <ul class="list">
+                                        ${slide.content.database.map(item => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${item}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="card card-green">
+                                    <h3>Frontend Optimizations</h3>
+                                    <ul class="list">
+                                        ${slide.content.frontend.map(item => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${item}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="card card-amber">
+                                    <h3>Backend Optimizations</h3>
+                                    <ul class="list">
+                                        ${slide.content.backend.map(item => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${item}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'error_handling':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-shield"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Validation Layers</h3>
+                                    ${slide.content.layers.map(layer => `
+                                        <div class="card card-blue" style="margin-bottom: 1rem;">
+                                            <p>${layer}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="code-block">
+                                    <h3>Exception Hierarchy</h3>
+                                    <pre class="code">${slide.content.exceptions}</pre>
+                                </div>
+                            </div>
+                            <div class="code-block" style="margin-top: 1.5rem;">
+                                <h3>Pydantic Validation Schema</h3>
+                                <pre class="code">${slide.content.validation}</pre>
+                            </div>
+                        </div>
+                    `;
+
+                case 'testing':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-test"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Testing Pyramid</h3>
+                                    ${slide.content.pyramid.map(test => `
+                                        <div class="card card-slate" style="margin-bottom: 1rem;">
+                                            <p style="font-size: 0.875rem;">${test}</p>
+                                        </div>
+                                    `).join('')}
+                                    <div class="card card-green">
+                                        <h3>Coverage Targets</h3>
+                                        <ul class="list">
+                                            ${slide.content.coverage.map(coverage => `
+                                                <li class="list-item" style="font-size: 0.875rem;">
+                                                    <div class="bullet"></div>
+                                                    ${coverage}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="code-block">
+                                    <h3>Test Examples</h3>
+                                    <pre class="code">${slide.content.examples}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'deployment':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-cpu"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div class="code-block">
+                                    <h3>Docker Configuration</h3>
+                                    <pre class="code">${slide.content.docker}</pre>
+                                </div>
+                                <div>
+                                    <div class="card card-blue mb-4">
+                                        <h3>Docker Compose</h3>
+                                        <p>${slide.content.compose}</p>
+                                    </div>
+                                    <div class="card card-green">
+                                        <h3>Production Features</h3>
+                                        <ul class="list">
+                                            ${slide.content.production.map(feature => `
+                                                <li class="list-item">
+                                                    <div class="bullet"></div>
+                                                    ${feature}
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'challenges':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-zap"></span> ${slide.title}</h1>
+                            ${slide.content.challenges.map(challenge => `
+                                <div class="card card-slate" style="margin-bottom: 1.5rem;">
+                                    <h3 style="color: #1e293b; margin-bottom: 1rem;">${challenge.problem}</h3>
+                                    <p style="color: #059669; font-weight: 500;">Solution: ${challenge.solution}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                case 'tradeoffs':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-settings"></span> ${slide.title}</h1>
+                            ${slide.content.decisions.map(decision => `
+                                <div class="phase-box">
+                                    <h3>${decision.choice}</h3>
+                                    <p style="margin-bottom: 1rem;"><strong>Decision:</strong> ${decision.decision}</p>
+                                    <div class="grid grid-cols-2">
+                                        <div>
+                                            <h4 style="color: #059669; margin-bottom: 0.5rem;">Pros</h4>
+                                            <ul class="list">
+                                                ${decision.pros.map(pro => `
+                                                    <li class="list-item" style="font-size: 0.875rem;">
+                                                        <div class="bullet" style="background: #059669;"></div>
+                                                        ${pro}
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 style="color: #dc2626; margin-bottom: 0.5rem;">Cons</h4>
+                                            <ul class="list">
+                                                ${decision.cons.map(con => `
+                                                    <li class="list-item" style="font-size: 0.875rem;">
+                                                        <div class="bullet" style="background: #dc2626;"></div>
+                                                        ${con}
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                case 'future':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-chart"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-3">
+                                <div class="card card-blue">
+                                    <h3>Microservices Split</h3>
+                                    ${slide.content.microservices.map(service => `
+                                        <span class="badge">${service}</span>
+                                    `).join('')}
+                                </div>
+                                <div class="card card-green">
+                                    <h3>Architecture Enhancements</h3>
+                                    <ul class="list">
+                                        ${slide.content.enhancements.map(enhancement => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${enhancement}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="card card-amber">
+                                    <h3>Scalability Features</h3>
+                                    <ul class="list">
+                                        ${slide.content.scalability.map(feature => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${feature}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'achievements':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-zap"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Project Metrics</h3>
+                                    ${slide.content.metrics.map(metric => `
+                                        <div class="card card-blue" style="margin-bottom: 1rem;">
+                                            <p style="font-size: 0.875rem;">${metric}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div>
+                                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Performance Benchmarks</h3>
+                                    ${slide.content.performance.map(benchmark => `
+                                        <div class="card card-green" style="margin-bottom: 1rem;">
+                                            <p style="font-size: 0.875rem;">${benchmark}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2" style="margin-top: 1.5rem;">
+                                <div class="card card-amber">
+                                    <h3>Quality Assurance</h3>
+                                    <ul class="list">
+                                        ${slide.content.quality.map(quality => `
+                                            <li class="list-item" style="font-size: 0.875rem;">
+                                                <div class="bullet"></div>
+                                                ${quality}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="thank-you-box">
+                                    <h2>Thank You!</h2>
+                                    <p>Questions & Discussion</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'questions':
+                    return `
+                        <div class="content-slide">
+                            <h1><span class="icon icon-code"></span> ${slide.title}</h1>
+                            <div class="grid grid-cols-2">
+                                <div class="card card-blue">
+                                    <h3>Discussion Areas</h3>
+                                    <ul class="list">
+                                        ${slide.content.areas.map(area => `
+                                            <li class="list-item">
+                                                <div class="bullet"></div>
+                                                ${area}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="card card-green">
+                                    <h3>Live Demo Available</h3>
+                                    ${slide.content.demo.map(item => `
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <strong style="color: #14532d;">${item.split(':')[0]}:</strong>
+                                            <span>${item.split(':')[1]}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return `
+                        <div class="content-slide">
+                            <div class="center-content">
+                                <h1>Slide Content</h1>
+                                <p>Content for this slide type is not yet implemented.</p>
+                            </div>
+                        </div>
+                    `;
+            }
+        }
+
+        function initSlides() {
+            renderSlide(currentSlide);
+            updateButtons();
+        }
+
+        function renderSlide(index) {
+            const slide = slides[index];
+            const content = renderSlideContent(slide);
+            document.getElementById('slideContent').innerHTML = content;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('slideCounter').textContent = (currentSlide + 1) + ' / ' + slides.length;
+        }
+
+        function updateButtons() {
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+
+            prevButton.disabled = currentSlide === 0;
+            nextButton.disabled = currentSlide === slides.length - 1;
+
+            renderSlideButtons();
+        }
+
+        function renderSlideButtons() {
+            const container = document.getElementById('slideButtons');
+            container.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const button = document.createElement('button');
+                button.className = 'slide-button' + (index === currentSlide ? ' active' : '');
+                button.textContent = slide.id;
+                button.onclick = () => goToSlide(index);
+                container.appendChild(button);
+            });
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                renderSlide(currentSlide);
+                updateButtons();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                renderSlide(currentSlide);
+                updateButtons();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            renderSlide(currentSlide);
+            updateButtons();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (event.key === 'F11') {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Initialize
+        initSlides();
+    </script>
+</body>
+</html>
