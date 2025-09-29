@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -10,9 +17,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertTriangle, CheckCircle, Loader2, X } from "lucide-react";
+import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 
 interface OrderChangeModalProps {
     isOpen: boolean;
@@ -36,7 +44,11 @@ interface ChangeRequest {
     reason?: string;
 }
 
-export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalProps) {
+export function OrderChangeModal({
+    isOpen,
+    onClose,
+    order,
+}: OrderChangeModalProps) {
     const [changeType, setChangeType] = useState<string>("");
     const [newValue, setNewValue] = useState<string>("");
     const [reason, setReason] = useState<string>("");
@@ -57,21 +69,21 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
         },
     });
 
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setChangeType("");
         setNewValue("");
         setReason("");
-    };
+    }, []);
 
-    const handleSubmit = () => {
+    const handleSubmit = useCallback(() => {
         if (!changeType || !newValue) return;
 
         const fieldMapping: Record<string, string> = {
-            "QUANTITY": "quantity",
-            "DATE": "dueDate",
-            "PRIORITY": "priority",
-            "ROUTING": "routingId",
-            "DESCRIPTION": "description"
+            QUANTITY: "quantity",
+            DATE: "dueDate",
+            PRIORITY: "priority",
+            ROUTING: "routingId",
+            DESCRIPTION: "description",
         };
 
         const changeData: ChangeRequest = {
@@ -79,13 +91,13 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
             change_type: changeType,
             field_name: fieldMapping[changeType],
             new_value: newValue,
-            reason: reason || undefined
+            reason: reason || undefined,
         };
 
         changeOrderMutation.mutate(changeData);
-    };
+    }, [changeType, newValue, order.orderId, reason, changeOrderMutation]);
 
-    const getCurrentValue = () => {
+    const getCurrentValue = useCallback(() => {
         switch (changeType) {
             case "QUANTITY":
                 return order.quantity.toString();
@@ -100,7 +112,7 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
             default:
                 return "";
         }
-    };
+    }, [changeType, order]);
 
     const renderValueInput = () => {
         switch (changeType) {
@@ -109,7 +121,9 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
                     <Input
                         type="number"
                         value={newValue}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewValue(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setNewValue(e.target.value)
+                        }
                         placeholder="Enter new quantity"
                         min="1"
                     />
@@ -119,7 +133,9 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
                     <Input
                         type="datetime-local"
                         value={newValue}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewValue(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setNewValue(e.target.value)
+                        }
                     />
                 );
             case "PRIORITY":
@@ -140,16 +156,20 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
                 return (
                     <Input
                         value={newValue}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewValue(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setNewValue(e.target.value)
+                        }
                         placeholder="Enter routing ID (e.g., RT001)"
                     />
                 );
             case "DESCRIPTION":
                 return (
                     <textarea
-                        className="w-full p-2 border border-gray-300 rounded-md resize-none"
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         value={newValue}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewValue(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                            setNewValue(e.target.value)
+                        }
                         placeholder="Enter new description"
                         rows={3}
                     />
@@ -159,106 +179,118 @@ export function OrderChangeModal({ isOpen, onClose, order }: OrderChangeModalPro
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b">
-                    <div>
-                        <h2 className="text-lg font-semibold flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5" />
-                            Change Production Order
-                        </h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Modify production order {order.orderId} for {order.materialId}
-                        </p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={onClose}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        Change Production Order
+                    </DialogTitle>
+                    <p className="text-sm text-muted-foreground">
+                        Modify production order {order.orderId} for{" "}
+                        {order.materialId}
+                    </p>
+                </DialogHeader>
 
-                {/* Content */}
-                <div className="p-6 space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Change Type</label>
-                        <Select value={changeType} onValueChange={setChangeType}>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Change Type</Label>
+                        <Select
+                            value={changeType}
+                            onValueChange={setChangeType}
+                        >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select what to change" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="QUANTITY">Quantity</SelectItem>
+                                <SelectItem value="QUANTITY">
+                                    Quantity
+                                </SelectItem>
                                 <SelectItem value="DATE">Due Date</SelectItem>
-                                <SelectItem value="PRIORITY">Priority</SelectItem>
+                                <SelectItem value="PRIORITY">
+                                    Priority
+                                </SelectItem>
                                 <SelectItem value="ROUTING">Routing</SelectItem>
-                                <SelectItem value="DESCRIPTION">Description</SelectItem>
+                                <SelectItem value="DESCRIPTION">
+                                    Description
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     {changeType && (
                         <div className="space-y-2">
-                            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                <p className="text-sm font-medium">Current Value:</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{getCurrentValue()}</p>
+                            <div className="p-3 bg-muted rounded-lg">
+                                <p className="text-sm font-medium">
+                                    Current Value:
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {getCurrentValue()}
+                                </p>
                             </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium mb-2">New Value</label>
+
+                            <div className="space-y-2">
+                                <Label>New Value</Label>
                                 {renderValueInput()}
                             </div>
                         </div>
                     )}
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Reason for Change (Optional)</label>
+                    <div className="space-y-2">
+                        <Label>Reason for Change (Optional)</Label>
                         <textarea
-                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md resize-none"
+                            className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={reason}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReason(e.target.value)}
+                            onChange={(
+                                e: React.ChangeEvent<HTMLTextAreaElement>
+                            ) => setReason(e.target.value)}
                             placeholder="Enter reason for this change..."
                             rows={2}
                         />
                     </div>
 
                     {changeOrderMutation.isError && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-sm text-red-800">
-                                Error: {changeOrderMutation.error?.message || "Failed to change order"}
+                        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                            <p className="text-sm text-destructive">
+                                Error:{" "}
+                                {changeOrderMutation.error?.message ||
+                                    "Failed to change order"}
                             </p>
                         </div>
                     )}
 
                     {changeOrderMutation.isSuccess && (
-                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-800">
                             <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                                <p className="text-sm text-green-800">
+                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <p className="text-sm text-green-800 dark:text-green-200">
                                     Order changed successfully!
                                 </p>
                             </div>
                         </div>
                     )}
-                </div>
 
-                {/* Footer */}
-                <div className="flex justify-end gap-2 p-6 border-t">
-                    <Button variant="outline" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button 
-                        onClick={handleSubmit}
-                        disabled={!changeType || !newValue || changeOrderMutation.isPending}
-                    >
-                        {changeOrderMutation.isPending && (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        )}
-                        Apply Change
-                    </Button>
+                    <div className="flex justify-end gap-2 pt-4">
+                        <Button variant="outline" onClick={onClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={
+                                !changeType ||
+                                !newValue ||
+                                changeOrderMutation.isPending
+                            }
+                        >
+                            {changeOrderMutation.isPending && (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            )}
+                            Apply Change
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,18 +44,35 @@ export default function MaterialCombobox({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Filter materials based on search term
-    const filteredMaterials = materials.filter(
-        (material) =>
-            material.materialId
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            material.description
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
+    const filteredMaterials = useMemo(
+        () =>
+            materials.filter(
+                (material) =>
+                    material.materialId
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    material.description
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+            ),
+        [materials, searchTerm]
     );
 
-    // Close dropdown when clicking outside
+    const getTypeColor = useCallback((type: string) => {
+        switch (type.toLowerCase()) {
+            case "raw":
+                return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+            case "semi_finished":
+                return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+            case "finished":
+                return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+            case "consumable":
+                return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+            default:
+                return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        }
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -71,48 +88,38 @@ export default function MaterialCombobox({
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Update search term when value changes externally
     useEffect(() => {
         setSearchTerm(value);
     }, [value]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        setSearchTerm(newValue);
-        onChange(newValue);
-        setIsOpen(true);
-    };
+    const handleInputChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const newValue = e.target.value;
+            setSearchTerm(newValue);
+            onChange(newValue);
+            setIsOpen(true);
+        },
+        [onChange]
+    );
 
-    const handleSelectMaterial = (material: Material) => {
-        setSearchTerm(material.materialId);
-        onChange(material.materialId);
-        setIsOpen(false);
-        inputRef.current?.focus();
-    };
+    const handleSelectMaterial = useCallback(
+        (material: Material) => {
+            setSearchTerm(material.materialId);
+            onChange(material.materialId);
+            setIsOpen(false);
+            inputRef.current?.focus();
+        },
+        [onChange]
+    );
 
-    const toggleDropdown = () => {
+    const toggleDropdown = useCallback(() => {
         if (!disabled) {
-            setIsOpen(!isOpen);
+            setIsOpen((prev) => !prev);
             if (!isOpen) {
                 inputRef.current?.focus();
             }
         }
-    };
-
-    const getTypeColor = (type: string) => {
-        switch (type.toLowerCase()) {
-            case "raw":
-                return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-            case "semi_finished":
-                return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-            case "finished":
-                return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-            case "consumable":
-                return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-            default:
-                return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-        }
-    };
+    }, [disabled, isOpen]);
 
     return (
         <div ref={containerRef} className="relative">
@@ -154,7 +161,7 @@ export default function MaterialCombobox({
                                 <button
                                     key={material.id}
                                     type="button"
-                                    className="w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none flex items-center justify-between"
+                                    className="w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none flex items-center justify-between transition-colors"
                                     onClick={() =>
                                         handleSelectMaterial(material)
                                     }
@@ -171,6 +178,7 @@ export default function MaterialCombobox({
                                     </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
                                         <Badge
+                                            variant="secondary"
                                             className={cn(
                                                 "text-xs",
                                                 getTypeColor(material.type)
@@ -190,7 +198,8 @@ export default function MaterialCombobox({
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             {searchTerm.trim() ? (
                                 <>
-                                    No materials found matching "{searchTerm}".
+                                    No materials found matching &quot;
+                                    {searchTerm}&quot;.
                                     <br />
                                     <span className="text-xs">
                                         You can still use this as a custom

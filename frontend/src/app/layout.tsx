@@ -13,7 +13,8 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
     title: "SAP Manufacturing System",
-    description: "gago",
+    description:
+        "Modern production planning and manufacturing execution system",
 };
 
 export default function RootLayout({

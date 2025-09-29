@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -40,7 +40,6 @@ export default function CreateOrderModal() {
     const [materialId, setMaterialId] = useState("");
     const queryClient = useQueryClient();
 
-    // Query for materials to populate the combobox
     const { data: materials = [] } = useQuery({
         queryKey: ["materials"],
         queryFn: async () => {
@@ -52,12 +51,11 @@ export default function CreateOrderModal() {
     });
 
     const mutation = useMutation({
-        mutationFn: (newOrder: NewOrder) => {
-            return axios.post(
+        mutationFn: (newOrder: NewOrder) =>
+            axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/production-orders`,
                 newOrder
-            );
-        },
+            ),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["orders"] });
             setIsOpen(false);
@@ -65,28 +63,31 @@ export default function CreateOrderModal() {
         },
     });
 
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setMaterialId("");
-    };
+    }, []);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+    const handleSubmit = useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
 
-        const newOrder: NewOrder = {
-            material_id: materialId,
-            quantity: parseInt(String(formData.get("quantity") || "0"), 10),
-            due_date: String(formData.get("dueDate") || ""),
-            priority: String(
-                formData.get("priority") || "MEDIUM"
-            ) as OrderPriority,
-            description: String(formData.get("description") || ""),
-            costCenter: String(formData.get("costCenter") || "CC001"),
-            plant: String(formData.get("plant") || "1000"),
-        };
+            const newOrder: NewOrder = {
+                material_id: materialId,
+                quantity: parseInt(String(formData.get("quantity") || "0"), 10),
+                due_date: String(formData.get("dueDate") || ""),
+                priority: String(
+                    formData.get("priority") || "MEDIUM"
+                ) as OrderPriority,
+                description: String(formData.get("description") || ""),
+                costCenter: String(formData.get("costCenter") || "CC001"),
+                plant: String(formData.get("plant") || "1000"),
+            };
 
-        mutation.mutate(newOrder);
-    };
+            mutation.mutate(newOrder);
+        },
+        [materialId, mutation]
+    );
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -96,7 +97,7 @@ export default function CreateOrderModal() {
                     Create Order
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>Create Production Order</DialogTitle>
                 </DialogHeader>
@@ -113,15 +114,35 @@ export default function CreateOrderModal() {
                             name="materialId"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <Input
-                            id="quantity"
-                            name="quantity"
-                            type="number"
-                            required
-                            min="1"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="quantity">Quantity</Label>
+                            <Input
+                                id="quantity"
+                                name="quantity"
+                                type="number"
+                                required
+                                min="1"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="priority">Priority</Label>
+                            <Select name="priority" defaultValue="MEDIUM">
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="LOW">Low</SelectItem>
+                                    <SelectItem value="MEDIUM">
+                                        Medium
+                                    </SelectItem>
+                                    <SelectItem value="HIGH">High</SelectItem>
+                                    <SelectItem value="URGENT">
+                                        Urgent
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="dueDate">Due Date</Label>
@@ -133,20 +154,6 @@ export default function CreateOrderModal() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="priority">Priority</Label>
-                        <Select name="priority" defaultValue="MEDIUM">
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="LOW">Low</SelectItem>
-                                <SelectItem value="MEDIUM">Medium</SelectItem>
-                                <SelectItem value="HIGH">High</SelectItem>
-                                <SelectItem value="URGENT">Urgent</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
                         <Input
                             id="description"
@@ -154,19 +161,29 @@ export default function CreateOrderModal() {
                             placeholder="Optional description"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="costCenter">Cost Center</Label>
-                        <Input
-                            id="costCenter"
-                            name="costCenter"
-                            defaultValue="CC001"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="costCenter">Cost Center</Label>
+                            <Input
+                                id="costCenter"
+                                name="costCenter"
+                                defaultValue="CC001"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="plant">Plant</Label>
+                            <Input
+                                id="plant"
+                                name="plant"
+                                defaultValue="1000"
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="plant">Plant</Label>
-                        <Input id="plant" name="plant" defaultValue="1000" />
-                    </div>
-                    <Button type="submit" disabled={mutation.isPending}>
+                    <Button
+                        type="submit"
+                        disabled={mutation.isPending}
+                        className="w-full"
+                    >
                         {mutation.isPending ? "Creating..." : "Create Order"}
                     </Button>
                 </form>
